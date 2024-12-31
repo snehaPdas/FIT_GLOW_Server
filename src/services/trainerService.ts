@@ -63,9 +63,19 @@ class TrainerService {
             console.log("there is no otp in email")
             throw new Error("no OTP found for this email")
           }
-          const latestOtp = validateOtp.sort(
-                  (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-                )[0];
+          const sortedOtp = validateOtp.sort((a, b) => {
+            if (b.createdAt.getTime() !== a.createdAt.getTime()) {
+                return b.createdAt.getTime() - a.createdAt.getTime(); // Sort by createdAt in descending order
+            } else {
+                return b.expiresAt.getTime() - a.expiresAt.getTime(); // If createdAt is the same, sort by expiresAt
+            }
+        });
+    
+    
+          const latestOtp = sortedOtp[0];
+
+
+
                 if (latestOtp.otp === otp) {
                   if (latestOtp.expiresAt > new Date()) {
                     console.log("otp expiration not working");
@@ -99,6 +109,33 @@ class TrainerService {
 
       }
 
+      async resendOTP(email: string): Promise<void> {
+        try {
+          const generatedOTP: string = Math.floor(
+            1000 + Math.random() * 9000
+          ).toString();
+          this.OTP = generatedOTP;
+    
+          const OTP_createdTime = new Date();
+          this.expiryOTP_time = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
+    
+          await this.trainerRepository.saveOTP(
+            email,
+            this.OTP,
+            this.expiryOTP_time
+          );
+    
+          const email_Ht=otpEmailTemplate(this.OTP,email||"user")
+           const sentEmail=await sendMail(" your otp for Registration is: ",email,email_Ht)
+           if(!sentEmail){throw new Error("Email not sent")}
+    
+          console.log(`Resent OTP ${this.OTP} to ${email}`);
+        } catch (error) {
+          console.error("Error in resendOTP:", (error as Error).message);
+          throw error;
+        }
+      }
+
       async verifyForgotOTP(userData: string, otp: string): Promise<void> {
         console.log("11111111111111111111111111111111",userData)
         try {
@@ -108,9 +145,17 @@ class TrainerService {
             console.log("there is no otp in email");
             throw new Error("no OTP found for this email");
           }
-          const latestOtp = validateOtp.sort(
-            (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-          )[0];
+          const sortedOtp = validateOtp.sort((a, b) => {
+            if (b.createdAt.getTime() !== a.createdAt.getTime()) {
+                return b.createdAt.getTime() - a.createdAt.getTime(); 
+            } else {
+                return b.expiresAt.getTime() - a.expiresAt.getTime(); 
+            }
+        });
+
+        const latestOtp = sortedOtp[0];
+
+
           if (latestOtp.otp === otp) {
             if (latestOtp.expiresAt > new Date()) {
               console.log("otp expiration not working");
@@ -255,17 +300,9 @@ class TrainerService {
 
         async kycSubmit(formData: any, files: { [fieldname: string]: Express.Multer.File[] }): Promise<any> {
           try {
+            console.log("got....",formData)
             const documents: { [key: string]: string | undefined } = {};
         
-            // const kycData = await this.trainerRepository.getOldImages(formData.trainer_id)
-      
-        
-            // if (kycData) {
-              
-            //   if (kycData.aadhaarFrontImage) await deleteFromCloudinary(kycData.aadhaarFrontImage);
-            //   if (kycData.aadhaarBackImage) await deleteFromCloudinary(kycData.aadhaarBackImage);
-            //   if (kycData.certificate) await deleteFromCloudinary(kycData.certificate);
-            // }
       
             if (files.profileImage?.[0]) {
               const profileImageUrl:any = await uploadToCloudinary(
@@ -313,6 +350,20 @@ class TrainerService {
           } catch (error) {
             console.error("Error in kycSubmit service:", error);
             throw new Error("Failed to submit KYC data");
+          }
+        }
+
+
+        async kycStatus(trainerId: string) {
+          console.log("reached in service")
+          console.log("trainer id is",trainerId)
+
+          try {
+            const kycStatus = await this.trainerRepository.getTrainerStatus(trainerId)
+            return kycStatus;
+          } catch (error) {
+            console.error("Error in kycStatus service:", error);
+            throw new Error("Failed to retrieve KYC status");
           }
         }
         

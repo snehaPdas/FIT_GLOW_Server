@@ -2,6 +2,8 @@ import  express  from "express";
 import UserRepository from "../repositories/userRepository";
 import UserService from "../services/userService";
 import UserController from "../controllers/userControllers";
+import authMiddlewares from "../middlewares/authmiddlewares";
+
 
 const router=express.Router()
 

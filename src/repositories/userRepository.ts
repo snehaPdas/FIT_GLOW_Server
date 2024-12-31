@@ -5,6 +5,9 @@ import mongoose from "mongoose";
 import { User } from "../interface/user_interface";
 
 class UserRepository {
+  deleteOtpByEmail(useremail: string) {
+    throw new Error("Method not implemented.");
+  }
   private userModel = UserModel;
   private otpModel = OtpModel;
   async existingUser(email: string): Promise<IUser | null> {

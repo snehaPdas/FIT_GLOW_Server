@@ -63,6 +63,26 @@ class TrainerController {
         }
       }
 
+      async resendOtp(
+        req: Request<{ email: string }>,
+        res: Response, next: NextFunction): Promise<void> {
+        try {
+          const { email } = req.body;
+          // console.log(email,'trainer cont');
+    
+          await this.trainerService.resendOTP(email);
+          res.status(200).json({ message: "OTP resent successfully" });
+        } catch (error) {
+          console.error("Resend OTP Controller error:", error);
+          if ((error as Error).message === "User not found") {
+            res.status(404).json({ message: "User not found" });
+          } else {
+           next(error)
+          }
+        }
+      }
+    
+
       async verifyForgotOtp(req: Request, res: Response, next: NextFunction) {
         console.log("verify otp controller");
         try {
@@ -183,7 +203,7 @@ class TrainerController {
 
         async kycSubmission(req: Request, res: Response, next: NextFunction): Promise<void> {
           try {
-            const {  name, email, phone } = req.body;
+            const {  trainer_id,name, email, phone } = req.body;
         
             const files = req.files as { [fieldname: string]: Express.Multer.File[] };
         
@@ -193,6 +213,7 @@ class TrainerController {
               name,
               email,
               phone,
+              trainer_id
             };
              console.log("------------>>>>",formData)
              console.log("---->>>-------->>>>",files)
@@ -206,6 +227,18 @@ class TrainerController {
           } catch (error) {
             console.error("Error in KYC submission:", error);
             next(error);
+          }
+        }
+
+        async trainerKycStatus(req: Request, res: Response, next: NextFunction) {
+          try {
+            const trainerId = req.params.trainerId;
+            const kycStatus = await this.trainerService.kycStatus(trainerId);
+      
+            res.status(200).json({ kycStatus });
+          } catch (error) {
+            console.error("Error fetching trainer KYC status:", error);
+            next(error)
           }
         }
         

@@ -18,7 +18,8 @@ const authMiddleware=(roles:string[]=[])=>{
             req.authData=decode
         //role check
             if(roles.length && !roles.includes(decode.role) ){
-                return res.status(403).json({message:"Access denied ,Role insuffcient "})
+                res.status(403).json({message:"Access denied ,Role insuffcient "})
+                return
             }
         
         next()

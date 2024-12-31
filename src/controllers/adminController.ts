@@ -156,6 +156,51 @@ class AdminController {
     }
   }
 
+  async trainersKycData(req: Request, res: Response, next: NextFunction):Promise<any>{
+    try {
+      const trainerId = req.params.trainer_id;
+      console.log("-----****************><><><>----",trainerId)
+      const trainerKycDetails = await this.adminService.fetchKycData(trainerId);
+      console.log("response check",trainerKycDetails)
+      return res.json({ kycData: trainerKycDetails });
+
+
+    } catch (error) {
+      console.log("error in controller",error)
+      
+    }
+
+  }
+  async getAllTrainersKycDatas(req: Request, res: Response, next: NextFunction) {
+    try {
+
+      const allTrainersKycData = await this.adminService.TraienrsKycData();
+      // console.log(allTrainersKycData);
+
+      res.status(200).json({ message: "Trainers KYC data fetched successfully", data: allTrainersKycData });
+    } catch (error) {
+      console.error("Error fetching KYC data:", error);
+      next(error)
+    }
+  }
+
+  
+  async changeKycStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const status = String(req.body.status);
+      const trainer_id = req.params.trainer_id;
+      const rejectionReason = req.body.rejectionReason || null;
+
+      await this.adminService.updateKycStatus(status, trainer_id, rejectionReason);
+
+      res.status(200).json({ message: 'Trainer status updated successfully', status });
+    } catch (error) {
+      console.error('Error updating trainer status:', error);
+      next(error)
+    }
+  }
+
+
   
 }
 

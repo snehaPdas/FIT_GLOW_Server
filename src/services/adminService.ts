@@ -109,6 +109,58 @@ async blockUnblockUser(user_id:string,userState:boolean){
   return await this.adminRepository.blockUnblockUser(user_id,userState)
 
 }
+
+async fetchKycData(trainerId:string){
+  console.log("hereeeeeeee")
+  try {
+    let response= await this.adminRepository.fetchKycData(trainerId)
+    console.log("casual checking",response)
+    return response
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
+async TraienrsKycData() {
+  try {
+    const allTrainersKycDatas = await this.adminRepository.getAllTrainersKycDatas();
+    // console.log('allTrainersKycDatas',allTrainersKycDatas);
+    
+    return allTrainersKycDatas; 
+  } catch (error) {
+    console.error("Error fetching trainers KYC data:", error);
+    throw error; 
+  }
+}
+
+async updateKycStatus(status: string, trainer_id: string, rejectionReason: string | null): Promise<void> {
+  try {
+    const updatedKyc = await this.adminRepository.updateKycStatus(status, trainer_id, rejectionReason);
+
+
+
+    if (status === 'approved' || status === 'rejected') {
+      await this.adminRepository.deleteKyc(trainer_id);
+      console.log(`KYC data deleted for trainer ID: ${trainer_id}`);
+    }
+
+
+    // if(status === 'approved') {
+    //   await sendMail('approve',updatedKyc, 'content')
+    // }else {
+
+    //   await sendMail('reject',updatedKyc.trainerMail, updatedKyc.reason)
+    // }
+
+  } catch (error) {
+    console.error('Error updating KYC status:', error);
+  }
+}
+
+
+
+
 }
 
 

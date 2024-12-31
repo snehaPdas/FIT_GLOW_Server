@@ -19,10 +19,11 @@ class UserService {
 
   // Register user and send OTP
   async register(userData: IUser): Promise<void> {
+    console.log("in service")
     try {
-      const existedUser = await this.userRepository.existingUser(
-        userData.email
-      );
+      const existedUser = await this.userRepository.existingUser(userData.email)
+      console.log("in service....",)
+
       if (existedUser) {
         console.log("user already exist", existedUser);
         throw new Error("Email Already Exists");
@@ -54,18 +55,33 @@ class UserService {
 
   // Verify OTP
   async verifyOTP(userData: IUser, otp: string): Promise<void> {
+    console.log("..................................")
+    
+
     try {
       const validateOtp = await this.userRepository.getOtpByEmail(
         userData.email
       );
-      console.log("the validateOtp is..", validateOtp);
+      console.log("the total otp in mail validateOtp is.....", validateOtp);
       if (validateOtp.length === 0) {
         console.log("there is no otp in email");
         throw new Error("no OTP found for this email");
       }
-      const latestOtp = validateOtp.sort(
-        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-      )[0];
+      const sortedOtp = validateOtp.sort((a, b) => {
+        if (b.createdAt.getTime() !== a.createdAt.getTime()) {
+            return b.createdAt.getTime() - a.createdAt.getTime(); // Sort by createdAt in descending order
+        } else {
+            return b.expiresAt.getTime() - a.expiresAt.getTime(); // If createdAt is the same, sort by expiresAt
+        }
+    });
+
+
+      const latestOtp = sortedOtp[0];
+
+      
+      console.log("User-entered OTP:", otp);
+    console.log("Latest OTP from database:", latestOtp.otp);
+
       if (latestOtp.otp === otp) {
         if (latestOtp.expiresAt > new Date()) {
           console.log("otp expiration not working");
@@ -134,13 +150,20 @@ class UserService {
       const generateOtp = Math.floor(1000 + Math.random() * 9000).toString();
       const OTP_createdTime = new Date();
       const expireyTime = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
-      await this.userRepository.saveOTP(useremail, generateOtp, expireyTime);
+     
+      
 
+      await this.userRepository.saveOTP(useremail, generateOtp, expireyTime);
+      this.OTP=generateOtp
       console.log("new generateOtp is:", generateOtp);
-      const isMailSent = await sendMail("otp", useremail, generateOtp);
+      
+
+      const isMailSent = await sendMail("otp", useremail, this.OTP);
       if (!isMailSent) {
         throw new Error("Email not sent");
       }
+      console.log(`otp:::Resent OTP ${this.OTP} to ${useremail}`);
+     
     } catch (error) {
       console.error("Error in resend otp:", error);
     }

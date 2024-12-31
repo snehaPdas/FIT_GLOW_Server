@@ -12,11 +12,12 @@ class UserController {
   }
 
   async register(req: Request, res: Response, next: NextFunction): Promise<void> {
+    console.log("reached in controller")
     try {
 
       const userData: IUser = req.body;
-      console.log(req.body)
-    
+      console.log("uuuuuuuu",req.body)
+         
       await this.userService.register(userData);
       res.status(200).json({ message: "Registration successful" });
     } catch (error:any) {
@@ -95,7 +96,7 @@ class UserController {
       const {useremail}=req.body
       await this.userService.ResendOtp(useremail)
     } catch (error) { 
-      
+      console.log("error in resend otp",error)
     }
   }
 

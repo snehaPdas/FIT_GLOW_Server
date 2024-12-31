@@ -101,6 +101,21 @@ class TrainerRepository {
     }
   }
 
+
+  async saveOTP(email: string, OTP: string, OTPExpiry: Date): Promise<void> {
+    try {
+      const newOtp = new this.otpModel({
+        email,
+        otp: OTP,
+        expiresAt: OTPExpiry,
+      });
+
+      await newOtp.save();
+    } catch (error) {
+      console.error("Error in saveOTP:", error);
+      throw error;
+    }
+  }
   
   
 
@@ -163,17 +178,19 @@ class TrainerRepository {
   }
 
   async saveKyc(formData: any, documents: any): Promise<any> {
+
   
     try {
-      
-      // Convert each specialization ID to an ObjectId instance
-      // const specializationIds = Array.isArray(formData.specialization)
-      //   ? formData.specialization.map((id: string) => new Types.ObjectId(id))
-      //   : [new Types.ObjectId(formData.specialization)];
+      let trainer = await this.trainerModel.findOne({ _id: formData.trainer_id }).select('specializations');
+      if (!trainer) {
+          throw new Error("Trainer not found for the given trainer ID");
+      }
 
+      console.log("-----specializations:", trainer.specializations);     
+    
       const kycData = {
-        //trainerId: new Types.ObjectId(formData.trainer_id),
-        //specializationId: specializationIds,
+        trainerId: new Types.ObjectId(formData.trainer_id),
+        specializationId: trainer.specializations,
         profileImage: documents.profileImageUrl,
         aadhaarFrontImage: documents.aadhaarFrontSideUrl,
         aadhaarBackImage: documents.aadhaarBackSideUrl,
@@ -181,8 +198,7 @@ class TrainerRepository {
         kycStatus: "pending",
         kycSubmissionDate: new Date(),
       };
-
-      console.log("//////////////////",kycData)
+        
 
       const savedKyc = await this.kycModel.create(kycData);
       console.log("KYC Data saved successfully:", savedKyc);
@@ -193,10 +209,29 @@ class TrainerRepository {
     }
   }
 
+
+  async getTrainerStatus(trainerId: string) {
+    try {
+      const trainer = await this.kycModel.findOne({trainerId}).select("kycStatus")
+        
+      if (!trainer) {
+        throw new Error(`Trainer with ID ${trainerId} not found`);
+      }
+      console.log("..............trainerkycstatus",trainer)
+      console.log("..............trainerkycstatus",trainer.kycStatus)
+
+
+      return trainer.kycStatus;
+    } catch (error) {
+      console.error("Error fetching trainer KYC status:", error);
+      throw new Error("Failed to fetch trainer KYC status");
+    }
+  }
+
   
   async changeKycStatus(trainerId: string, profileImage: string | undefined): Promise<string | undefined> {
     try {
-      // Update the trainer's profile image and KYC status
+      // Update the trainers profile image and KYC status
       const trainerUpdate = await this.trainerModel.findByIdAndUpdate(
         trainerId,
         {
@@ -210,7 +245,7 @@ class TrainerRepository {
         throw new Error("Trainer not found");
       }
   
-      // Update the corresponding KYC record
+
       await this.kycModel.findOneAndUpdate(
         { trainerId: trainerId },
         { kycStatus: "submitted" },
