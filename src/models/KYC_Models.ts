@@ -13,5 +13,5 @@ const kycSchema = new Schema<IKYC>({
 }, { timestamps: true });
 
 const KYCModel = model<IKYC>("KYC", kycSchema);
-export default KYCModel;
+export default KYCModel
 

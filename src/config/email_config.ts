@@ -3,11 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const sendMail = async (
-  type: string,
-  email: string,
-  content: string
-): Promise<boolean> => {
+const sendMail = async ( type: string, email: string, content: string): Promise<boolean> => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     port: 465,

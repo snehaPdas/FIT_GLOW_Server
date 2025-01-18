@@ -241,6 +241,82 @@ class TrainerController {
             next(error)
           }
         }
+
+        async getSpecialization(req:Request,res:Response,next:NextFunction){
+        
+          try {
+            const trainerId=req.params.trainerId
+            console.log("trainer id for specialization",trainerId)
+            const specialisations=await this .trainerService.getSpecialization(trainerId)
+            
+             res.status(200).json({message:"specialisation fetched successfully",data:specialisations})
+            
+          } catch (error) {
+            console.log(
+              "Error in contoller",error
+            )
+          }
+        }
+
+        async storeSessionData(req:Request,res:Response,next:NextFunction){
+          console.log("reached in session place")
+          try{
+
+            const {selectedDate,startTime,endTime,startDate,endDate,specialization,price,type,status} =req.body
+
+           
+            const trainerId=req.params.trainerId
+            const sessionData:any={}
+            if(type==="Single"){
+
+              sessionData.selectedDate=selectedDate,
+              sessionData.startTime=startTime,
+              sessionData.endTime=endTime,
+              sessionData.specialization=specialization
+              sessionData.price=price
+              sessionData.type="single"
+              sessionData.trainerId=trainerId
+            }else{
+              sessionData.specialization=specialization,
+              sessionData.startDate=startDate,
+              sessionData.endDate=endDate,
+              sessionData.startTime=startTime,
+              sessionData.endTime=endTime,
+              sessionData.price=price,
+              sessionData.type="package",
+              sessionData.trainerId=trainerId
+
+            }
+        
+          const sessioncreated=await this.trainerService.storeSessionData(sessionData)
+          res
+          .status(201)
+          .json({ message: "Session created successfully.", sessioncreated });
+
+          }catch(error){
+            console.log("Error in controller while storing session data",error)
+          }
+          
+
+
+        }
+        async getSessionSchedules(req: Request, res: Response, next: NextFunction) {
+          try {
+            const trainer_id = req.params.trainerId;
+            const sheduleData = await this.trainerService.getSessionShedules(
+              trainer_id
+            );
+            console.log('sheduleData',sheduleData);
+      
+            res
+              .status(200)
+              .json({ message: "Session data feched sucessfully", sheduleData });
+          } catch (error) {
+            console.error("Error saving session data:", error);
+           next(error)
+          }
+        }
+      
         
         
 }

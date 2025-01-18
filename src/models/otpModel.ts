@@ -8,7 +8,7 @@ const otpSchema=new Schema<IOtp>({
     expiresAt:{type:Date,required:true}
 },{timestamps:true})
 
-//ttl
+
 
 otpSchema.index({expiresAt:1},{expireAfterSeconds:0})
 

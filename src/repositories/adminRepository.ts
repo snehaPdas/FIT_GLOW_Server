@@ -164,6 +164,8 @@ async getAllTrainersKycDatas() {
 
           if(status === 'approved') {
             console.log('approve hit with',updatedTrainer.email);
+
+            
             
             if(updatedTrainer.email) {
               return updatedTrainer.email

@@ -16,4 +16,4 @@ export interface LoginAdmin_interface {
     createdAt: Date;
     isListed: boolean;
 
-  }
+  }                         

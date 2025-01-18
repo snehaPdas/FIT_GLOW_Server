@@ -5,7 +5,7 @@ import { otpEmailTemplate } from "../config/otpTemplate";
 import bcrypt from "bcrypt"
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwtHelper";
 import { uploadToCloudinary } from "../config/clodinary";
-
+import { ISession } from "../interface/trainer_interface";
 
 
 class TrainerService {
@@ -13,13 +13,14 @@ class TrainerService {
     private OTP: string | null = null;
     private expiryOTP_time:Date | null=null
 
-
     constructor(trainerRepository: TrainerRepository) {
         this.trainerRepository = trainerRepository;
       }
       async findAllSpecializations() {
         try {
-          return await this.trainerRepository.findAllSpecializations();
+        const  response=await this.trainerRepository.findAllSpecializations();
+        console.log("response gotttt",response)
+        return response
         } catch (error) {
           console.error("Error in service while fetching specializations:", error);
           throw error;
@@ -42,9 +43,7 @@ class TrainerService {
            if(!sentEmail){throw new Error("Email not sent")}
            const OTP_createdTime=new Date()
            this.expiryOTP_time=new Date(OTP_createdTime.getTime()+1*60*1000)
-
-
-          await this.trainerRepository.saveOtp(trainerData.email,this.OTP,this.expiryOTP_time)
+           await this.trainerRepository.saveOtp(trainerData.email,this.OTP,this.expiryOTP_time)
             
         } catch (error) {
           console.error("Error in service:", );
@@ -54,7 +53,7 @@ class TrainerService {
 
 
       async verifyOtp(trainerData:Interface_Trainer,otp:string){
-        console.log("11111111111111",trainerData)
+        
 
         try {
           const validateOtp=await this.trainerRepository.getOtpByEmail(trainerData.email)
@@ -70,19 +69,12 @@ class TrainerService {
                 return b.expiresAt.getTime() - a.expiresAt.getTime(); // If createdAt is the same, sort by expiresAt
             }
         });
-    
-    
-          const latestOtp = sortedOtp[0];
-
-
-
-                if (latestOtp.otp === otp) {
+                 const latestOtp = sortedOtp[0];
+                  if (latestOtp.otp === otp) {
                   if (latestOtp.expiresAt > new Date()) {
                     console.log("otp expiration not working");
           
                     console.log("OTP is valid and verified", latestOtp.expiresAt);
-                   
-                    
                     const hashedPassword = await bcrypt.hash(trainerData.password, 10);
                     
                     const newUserData = { ...trainerData, password: hashedPassword };
@@ -137,7 +129,7 @@ class TrainerService {
       }
 
       async verifyForgotOTP(userData: string, otp: string): Promise<void> {
-        console.log("11111111111111111111111111111111",userData)
+      
         try {
           const validateOtp = await this.trainerRepository.getOtpByEmail(userData);
           console.log("the validateOtp is..", validateOtp);
@@ -366,14 +358,53 @@ class TrainerService {
             throw new Error("Failed to retrieve KYC status");
           }
         }
-        
-        
+
+     async getSpecialization(trainerId:string){
+
+     try {
+        return await this.trainerRepository.getSpecialization(trainerId)
+     } catch (error) {
+      console.log("Error in service while specialization fetching",error)
+     }
+     }
+
+     async storeSessionData(sessiondata:ISession){
+      console.log("yes no problem here")
+      try{
+        const startTimeInput = sessiondata.startTime;
+        const endTimeInput = sessiondata.endTime;
+
+        const startTime = new Date(`1970-01-01T${startTimeInput}`);
+        const endTime = new Date(`1970-01-01T${endTimeInput}`);
+  
+        if (startTime >= endTime) {
+          throw new Error("End time must be after start time");
+        }
+
+        const MINIMUM_SESSION_DURATION = 30;
+      const duration = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+
+      if (duration < MINIMUM_SESSION_DURATION) {
+        throw new Error("Session duration must be at least 30 minutes");
+      }
+     return  await this.trainerRepository.createNewSession(sessiondata)
+
+      }catch(error){
+        console.log("Error in service",error)
+      }
       
 
+     }
+     async getSessionShedules(trainer_id: string) {
+      try {
+        return await this.trainerRepository.fetchSessionData(trainer_id)
+      } catch (error) {
+        throw new Error("Error getting sessin shedule data");
+      }
+    }
+
+
 }
-
-
-
 
 
 export default TrainerService;

@@ -6,7 +6,7 @@ const specializationSchema = new Schema<ISpecialization>({
     name: { type: String, required: true },
     description:{type:String,required:true},
     createdAt: { type: Date, default: Date.now },
-    image:{type:String,required:true},
+    image:{type:String},
     isListed: { type: Boolean, default: true },
   });
   const specializationModel=model<ISpecialization>("ISpecialization",specializationSchema)

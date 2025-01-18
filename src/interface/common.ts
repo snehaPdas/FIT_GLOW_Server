@@ -30,3 +30,23 @@ export interface IUser {
     exp: number;
   }
   
+
+  export interface IBooking {
+    _id?: mongoose.Types.ObjectId;
+    sessionId: mongoose.Types.ObjectId;
+    trainerId: mongoose.Types.ObjectId;
+    userId: mongoose.Types.ObjectId | undefined; 
+    specialization?: string;
+    sessionType: string;
+    bookingDate: Date;
+    startDate: Date;
+    endDate: Date; 
+    startTime: string;
+    endTime: string;
+    amount: number | undefined;
+   paymentStatus: "Confirmed" | "Cancelled" | "Completed";
+    createdAt: Date; 
+  updatedAt: Date; 
+  payment_intent?: string;
+
+  }

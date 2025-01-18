@@ -36,7 +36,7 @@ app.use(cookieParser())
 // Routes
 app.use("/api/user/", userRoute);
 app.use("/api/admin/", adminRoute);
-app.use("/api/trainer",trainerRoute)
+app.use("/api/trainer/",trainerRoute)
 
 
 console.log('hit index'); 

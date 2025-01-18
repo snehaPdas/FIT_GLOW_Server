@@ -1,12 +1,15 @@
 // userService.ts
 import UserRepository from "../repositories/userRepository";
 import sendMail from "../config/email_config";
-import { IUser } from "../interface/common";
+import { IBooking, IUser } from "../interface/common";
 import bcrypt from "bcrypt";
 import { JwtPayload } from "../interface/common";
 import { generateAccessToken } from "../utils/jwtHelper";
 import { generateRefreshToken } from "../utils/jwtHelper";
-import { verifyRefreshToken } from "../utils/jwtHelper";
+import { verifyRefreshToken } from "../utils/jwtHelper"
+import stripeClient from "../config/stripeClients";
+import mongoose from "mongoose";
+import stripe from "stripe";
 
 class UserService {
   private userRepository: UserRepository;
@@ -55,10 +58,7 @@ class UserService {
 
   // Verify OTP
   async verifyOTP(userData: IUser, otp: string): Promise<void> {
-    console.log("..................................")
-    
-
-    try {
+  try {
       const validateOtp = await this.userRepository.getOtpByEmail(
         userData.email
       );
@@ -69,9 +69,9 @@ class UserService {
       }
       const sortedOtp = validateOtp.sort((a, b) => {
         if (b.createdAt.getTime() !== a.createdAt.getTime()) {
-            return b.createdAt.getTime() - a.createdAt.getTime(); // Sort by createdAt in descending order
+            return b.createdAt.getTime() - a.createdAt.getTime(); 
         } else {
-            return b.expiresAt.getTime() - a.expiresAt.getTime(); // If createdAt is the same, sort by expiresAt
+            return b.expiresAt.getTime() - a.expiresAt.getTime(); 
         }
     });
 
@@ -150,9 +150,6 @@ class UserService {
       const generateOtp = Math.floor(1000 + Math.random() * 9000).toString();
       const OTP_createdTime = new Date();
       const expireyTime = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
-     
-      
-
       await this.userRepository.saveOTP(useremail, generateOtp, expireyTime);
       this.OTP=generateOtp
       console.log("new generateOtp is:", generateOtp);
@@ -307,6 +304,131 @@ class UserService {
       console.log("response check in userservice ", response);
       return response;
     } catch (error) {}
+  }
+
+  async getAllTrainers(){
+    
+    console.log("ïn service")
+    try {
+      const trainers=await this.userRepository.getAllTrainers()
+      const validTrainers=trainers?.filter((trainer)=>trainer.isBlocked===false && trainer.kycStatus==="approved")||[]
+      
+      return validTrainers
+      
+    } catch (error) {
+      console.log("Fetching Trainers error in service",error)
+      
+    }
+
+  }
+  async getSessionSchedules() {
+    try {
+      return await this.userRepository.fetchAllSessionSchedules();
+    } catch (error) {}
+  }
+  async getTrainer(trainerId: string) {
+    try {
+      return await this.userRepository.getTrainer(trainerId);
+    } catch (error) {}
+  }
+///////////////////////////////////////////////////////////////////
+  async checkoutPayment(sessionID:string,userId:string) {
+try {
+ 
+  const sessionData = await this.userRepository.findSessionDetails(sessionID);
+
+  console.log("sessionData is......",sessionData)
+  if (!sessionData || typeof sessionData.price !== "number" ||  !(sessionData.selectedDate || sessionData.startDate) ) {
+    throw new Error("Missing or invalid session data");
+  }
+  const startDate = new Date(sessionData.selectedDate || sessionData.startDate);
+    if (isNaN(startDate.getTime())) {
+      throw new Error("Invalid start date");
+    }
+    const endDate = sessionData.endDate ? new Date(sessionData.endDate) : null;
+    if (endDate && isNaN(endDate.getTime())) {
+      throw new Error("Invalid end date");
+    }
+  
+  
+  const lineItems = [
+    {
+      price_data: {
+        currency: "INR",
+        unit_amount: sessionData?.price* 100 ,
+        product_data: {
+          name: "TrainerName",
+          description: sessionData.type
+              ? `Description: Session from ${sessionData.startTime} to ${sessionData.endTime} on ${startDate.toLocaleDateString()}`
+              : `Description: Session from ${sessionData.startTime} to ${sessionData.endTime} on ${startDate.toLocaleDateString()} to ${endDate?.toLocaleDateString()}`,
+          },
+      },
+       
+      quantity: 1,
+    },
+  ];
+ 
+  const session = await stripeClient.checkout.sessions.create({
+    payment_method_types: ['card'],
+     line_items: lineItems,
+    mode: 'payment',
+    success_url: `http://localhost:5173/paymentSuccess?session_id=${sessionData._id}&stripe_session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `http://localhost:5173/paymentFailed`,
+  });
+
+  return session
+} catch (error) {
+  console.log("Error in userservice payment",error)
+}
+  }
+
+  async findBookingDetails(session_id: string, user_id: string, stripe_session_id: string) {
+    try {
+      const session = await this.userRepository.findSessionDetails(session_id);
+      console.log("session issssssssss",session)
+      if (session) {
+        session.status = "Confirmed";
+        await session.save();
+      }
+      const trainerId = session?.trainerId;
+      if (!trainerId) {
+        throw new Error("Trainer ID is not available in the session.");
+      }
+      
+      
+      const trainer = await this.getTrainer(trainerId.toString());
+      const sessionData = await stripeClient.checkout.sessions.retrieve(stripe_session_id)
+
+        if (!trainer || trainer.length === 0) {
+        throw new Error("Trainer not found.");
+      }
+       const bookingDetails: IBooking = {
+        sessionId: new mongoose.Types.ObjectId(session._id),
+        trainerId: new mongoose.Types.ObjectId(trainer[0]._id),
+        userId: new mongoose.Types.ObjectId(user_id),
+       // specialization: session.specializationId.name,
+        sessionType: session.type ,
+        bookingDate: new Date(),
+        startDate: session.selectedDate || session.startDate,
+        endDate: session.endDate,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        amount: session.price,
+        paymentStatus: "Confirmed",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        payment_intent: sessionData.payment_intent ? sessionData.payment_intent.toString() : undefined
+      };
+      const existingBooking = await this.userRepository.findExistingBooking(bookingDetails);
+      if (existingBooking) {
+        console.log("Booking already exists.");
+        throw new Error("Booking already exists.");
+      }
+      const bookingData=await this.userRepository.createBooking(bookingDetails)
+      
+    } catch (error) {
+      console.log("error in fetching userservice",error)
+    }
   }
 }
 

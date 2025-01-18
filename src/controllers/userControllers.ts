@@ -16,7 +16,7 @@ class UserController {
     try {
 
       const userData: IUser = req.body;
-      console.log("uuuuuuuu",req.body)
+      
          
       await this.userService.register(userData);
       res.status(200).json({ message: "Registration successful" });
@@ -212,6 +212,84 @@ async resetPassword(req:Request,res:Response,next:NextFunction):Promise<any>{
 
   }
 }
+
+async getAllTrainers(req:Request,res:Response,next:NextFunction){
+  console.log("ïn controller")
+  try {
+    const allTrainers=await this.userService.getAllTrainers()
+    
+    res.status(200).json(allTrainers)
+    
+  } catch (error) {
+    console.log("Error fetching Trainers",error)
+    
+  }
+
+}
+
+async getSessionSchedules(req: Request, res: Response, next: NextFunction) {
+  try {
+    const sessionSchedules = await this.userService.getSessionSchedules();
+    res.status(200).json(sessionSchedules);
+  } catch (error) {
+    next(error)
+  }
+}
+
+async getTrainer(req: Request, res: Response, next: NextFunction) {
+  try {
+    
+    const trainerId = req.params.trainerId;
+
+    if (!trainerId) {
+      res.status(400).json({ message: "Trainer ID is required" });
+    }
+
+    const trainer = await this.userService.getTrainer(trainerId);
+    // console.log(trainer);
+
+    if (!trainer) {
+      res.status(404).json({ message: "Trainer not found" });
+    }
+
+    res.status(200).json(trainer);
+  } catch (error) {
+    console.error("Error in getTrainer controller:", error);
+   next(error)
+  }
+}
+async checkoutPayment(req: Request, res: Response, next: NextFunction){
+  try {
+    const userId=req.body.userData
+    const sessionID=req.params.sessionId
+    console.log("session id",sessionID,"user is",userId)
+    const paymentResponse=await this.userService.checkoutPayment( sessionID,userId)
+    console.log("iiiiiiiiiiii bpaymentResponse",paymentResponse)
+    res.status(200).json({ id: paymentResponse?.id });
+  } catch (error) {
+    console.log("error while payment in controller",error)
+  }
+
+}
+
+async createBooking(req: Request, res: Response, next: NextFunction){
+  try {
+    console.log(
+      "ytes    reached..............." 
+    )
+    const { sessionId, userId , stripe_session_id} = req.body;
+    
+    const bookingDetails = await this.userService.findBookingDetails(
+      sessionId,
+      userId,
+      stripe_session_id
+    );
+  } catch (error) {
+    console.log("Error in create booking in controller",error);
+  }
+
+}
+
 
 }
 

@@ -35,8 +35,14 @@ router.post("/refresh-token",trainerController.refreshToken.bind(trainerControll
 router.post("/forgotpassword",trainerController.forgotpassword.bind(trainerController))
 router.post("/forgototp",trainerController.verifyForgotOtp.bind(trainerController))
 router.post("/resetpassword",trainerController.resetPassword.bind(trainerController))
-router.post("/trainers/kyc",authMiddlewares(["trainer"]) ,uploadTrainerDataFiles,trainerController.kycSubmission.bind(trainerController))
-router.get('/kycStatus/:trainerId', authMiddlewares(["trainer"]), trainerController.trainerKycStatus.bind(trainerController));
+router.post("/trainers/kyc",uploadTrainerDataFiles,trainerController.kycSubmission.bind(trainerController))
+router.get('/kycStatus/:trainerId', trainerController.trainerKycStatus.bind(trainerController));
+router.get("/specializations/:trainerId",trainerController.getSpecialization.bind(trainerController))
+
+router.post('/session/:trainerId', trainerController.storeSessionData.bind(trainerController))
+router.get('/shedules/:trainerId', trainerController.getSessionSchedules.bind(trainerController))
+
+
 
 
 

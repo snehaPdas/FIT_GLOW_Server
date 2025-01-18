@@ -5,14 +5,17 @@ import OtpModel from "../models/otpModel";
 import { IOtp } from "../interface/common";
 import mongoose, { Types } from "mongoose";
 import KYCModel from "../models/KYC_Models";
+import { ISession } from "../interface/trainer_interface";
+import SessionModel from "../models/sessionModel";
+import moment from "moment";
 
 class TrainerRepository {
   
-
   private specializationModel = SpecializationModel;
   private trainerModel = TrainerModel;
   private otpModel = OtpModel;
   private kycModel = KYCModel;
+  private sessionModel=SessionModel
 
   async existingUser(email: string): Promise<Interface_Trainer | null> {
     try {
@@ -20,6 +23,7 @@ class TrainerRepository {
     } catch (error) {
       throw error;
     }
+    
   }
 
   async findAllSpecializations() {
@@ -76,7 +80,7 @@ class TrainerRepository {
       console.log("Specializations before processing:", trainerData.specializations);
 
     if (trainerData.specializations && trainerData.specializations.length > 0) {
-      // Convert specialization names to ObjectIds
+      
       specializationIds = await Promise.all(
         trainerData.specializations.map(async (specName) => {
           const specialization = await SpecializationModel.findOne({ name: specName });
@@ -88,10 +92,10 @@ class TrainerRepository {
       );
     }
 
-      // Create and save the trainer
+      
     const trainer = new this.trainerModel({
       ...trainerData,
-      specializations: specializationIds, // Use ObjectIds for specializations
+      specializations: specializationIds, 
     });
         
       await trainer.save();
@@ -211,15 +215,19 @@ class TrainerRepository {
 
 
   async getTrainerStatus(trainerId: string) {
+    console.log("get repository to getstatus><><><>,",trainerId)
     try {
-      const trainer = await this.kycModel.findOne({trainerId}).select("kycStatus")
+      const trainer = await this.trainerModel.findById(trainerId).select("kycStatus")
+      console.log(",,,,,,,,,,,,,,,,,,",trainer)
+      
+
         
       if (!trainer) {
         throw new Error(`Trainer with ID ${trainerId} not found`);
       }
-      console.log("..............trainerkycstatus",trainer)
+      
       console.log("..............trainerkycstatus",trainer.kycStatus)
-
+      
 
       return trainer.kycStatus;
     } catch (error) {
@@ -255,6 +263,100 @@ class TrainerRepository {
     } catch (error) {
       console.error("Error changing trainer KYC status:", error);
       throw new Error("Failed to change trainer KYC status");
+    }
+  }
+
+  async getSpecialization(trainerid:string){
+    try {
+      if(!trainerid){
+        console.log("trainer id is not found")
+        return
+      }
+      const specialisations=await this.trainerModel.findById(trainerid).populate("specializations")
+      console.log("specialisation sare....",specialisations?.specializations)
+      return specialisations
+    } catch (error) {
+      console.log("Error in Repository specialisation fetch",error)
+    }
+
+  }
+  async createNewSession(sessiondata:ISession){
+    try {
+      console.log("^^^^^^^^^^^^^^^",sessiondata)
+      const findTrainer=await this.trainerModel.findById(sessiondata.trainerId)
+      if(!findTrainer){
+        throw new Error("trainer is not found")
+      }
+      const existingSessions=await this.sessionModel.find({trainerId:sessiondata.trainerId,
+        $or:[
+          {
+          startDate:{
+          $gte: sessiondata.startDate,
+          $lte: sessiondata.endDate,
+        }
+      },{
+        startDate: sessiondata.startDate,
+        endDate: null,
+      }
+      ]
+      })
+      //here--------conflict-----checking------------------
+
+      const hasConflict=existingSessions.some((existingSession)=>{
+        const existingStartDate=moment(existingSession.startDate)
+        const existingEndDate=moment(existingSession.endDate?moment(existingSession.endDate) :existingStartDate)
+        const existingStartTime = moment(existingSession.startTime, "HH:mm");
+        const existingEndTime = moment(existingSession.endTime, "HH:mm");
+
+        const newStartDate = moment(sessiondata.startDate);
+        const newEndDate = sessiondata.endDate
+          ? moment(sessiondata.endDate)
+          : newStartDate;
+
+        const newStartTime = moment(sessiondata.startTime, "HH:mm");
+        const newEndTime = moment(sessiondata.endTime, "HH:mm");
+        // Check date and time overlap
+        const dateRangeOverlaps =
+          newStartDate.isSameOrBefore(existingEndDate) &&
+
+          newEndDate.isSameOrAfter(existingStartDate);
+
+        const timeRangeOverlaps =
+          newStartTime.isBefore(existingEndTime) &&
+          newEndTime.isAfter(existingStartTime);
+
+        return dateRangeOverlaps && timeRangeOverlaps;
+
+      })
+      if (hasConflict)
+        throw new Error("Time conflict with an existing session.");
+
+      sessiondata.price = Number(sessiondata.price);
+
+      //  session with multiple specializations
+      const createdSessionData = (
+        await this.sessionModel.create(sessiondata)
+      ).populate("specializationId");
+
+      return createdSessionData;
+
+    } catch (error) {
+      console.log("error in Repository",error)
+    }
+
+  }
+  async fetchSessionData(trainer_id: string) {
+    try {
+      const sesseionData = await this.sessionModel
+        .find({
+          trainerId: trainer_id,
+        })
+        .populate("specializationId")
+        .sort({ createdAt: -1 });
+
+      return sesseionData;
+    } catch (error) {
+      throw error;
     }
   }
   

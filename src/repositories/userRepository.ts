@@ -1,8 +1,12 @@
-import { IOtp, IUser } from "../interface/common";
+import { IBooking, IOtp, IUser } from "../interface/common";
 import UserModel from "../models/userModel";
 import OtpModel from "../models/otpModel";
 import mongoose from "mongoose";
 import { User } from "../interface/user_interface";
+import TrainerModel from "../models/trainerModel";
+import SessionModel from "../models/sessionModel";
+import { ISpecialization } from "../interface/trainer_interface";
+import BookingModel from "../models/bookingModel";
 
 class UserRepository {
   deleteOtpByEmail(useremail: string) {
@@ -10,6 +14,9 @@ class UserRepository {
   }
   private userModel = UserModel;
   private otpModel = OtpModel;
+  private trainerModel=TrainerModel
+  private sessionModel=SessionModel
+  private bookingModel=BookingModel
   async existingUser(email: string): Promise<IUser | null> {
     try {
       return await this.userModel.findOne({ email });
@@ -128,6 +135,83 @@ class UserRepository {
       throw error;
     }
   }
+  async getAllTrainers(){
+    console.log("ïn repo")
+    try{
+    const trainers=await this.trainerModel.find({}).populate("specializations","name")
+    
+    
+    return trainers
+    }
+    catch(error){
+   console.log("error fetching trainersn in repository",error)
+    }
+  }
+  async fetchAllSessionSchedules() {
+    try {
+      const schedules = await this.sessionModel.find({}).populate('specializationId')
+      return schedules;
+    } catch (error) {}
+  }
+  async getTrainer(trainerId: string) {
+    try {
+      const trainer = await this.trainerModel
+        .find({ _id: trainerId })
+        .populate("specializations");
+      
+
+      return trainer;
+    } catch (error) {}
+  }
+
+
+   userIsBlocked = async (user_id: string): Promise<boolean> => {
+        console.log("user id got in repo",user_id)
+    try {
+      
+      const userDetails= await this.userModel.findById( user_id);
+      console.log("userDetails are",userDetails)
+      if (userDetails?.isBlocked === true) {
+        return true;
+      };
+      return false
+    } catch (error) {
+      throw error;
+    }
+  }
+  async findSessionDetails(sessionID: string) {
+    console.log("seesion is",sessionID)
+  const response=await this.sessionModel.findById(sessionID).populate<{specializationId:ISpecialization}>("specializationId")
+  console.log("response of payment is ",response)
+  return response
+}
+async findExistingBooking(bookingDetails:IBooking){
+  try {
+    const existinBooking= await this.bookingModel.findOne({sessionId: bookingDetails.sessionId,
+      userId: bookingDetails.userId})
+      await this.sessionModel.findByIdAndUpdate(
+        { _id: bookingDetails.sessionId },
+        { isBooked: true },
+        { new: true }
+      );
+      return existinBooking
+  } catch (error) {
+    console.log("Error in existing booking repository",error)
+    
+  }
+}
+
+async createBooking(bookingDetails:IBooking){   
+  try {
+    console.log("booking details is",bookingDetails)
+    const bookingnew =await this.bookingModel.create(bookingDetails)
+    return bookingnew
+  } catch (error) {
+    console.error("Error creating booking:", error);
+      throw new Error("Failed to create booking.");
+  }
+
+}
 }
 
 export default UserRepository;
