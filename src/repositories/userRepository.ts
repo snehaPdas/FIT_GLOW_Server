@@ -7,6 +7,7 @@ import TrainerModel from "../models/trainerModel";
 import SessionModel from "../models/sessionModel";
 import { ISpecialization } from "../interface/trainer_interface";
 import BookingModel from "../models/bookingModel";
+import SpecializationModel from "../models/specializationModel";
 
 class UserRepository {
   deleteOtpByEmail(useremail: string) {
@@ -17,6 +18,8 @@ class UserRepository {
   private trainerModel=TrainerModel
   private sessionModel=SessionModel
   private bookingModel=BookingModel
+  private specializationModel=SpecializationModel
+  
   async existingUser(email: string): Promise<IUser | null> {
     try {
       return await this.userModel.findOne({ email });
@@ -211,6 +214,16 @@ async createBooking(bookingDetails:IBooking){
       throw new Error("Failed to create booking.");
   }
 
+}
+async fetchSpecializations(){
+  try {
+    console.log("specialization repo")
+    const response=await this.specializationModel.find({})
+    console.log("response of specialization repo",response)
+  return response
+  } catch (error) {
+    console.log("Error in fetching specialization repository",error)
+  }
 }
 }
 

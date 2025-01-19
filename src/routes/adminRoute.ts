@@ -3,6 +3,8 @@ import AdminRepository from "../repositories/adminRepository"
 import AdminService from "../services/adminService"
 import AdminController from "../controllers/adminController"
 import authMiddleware from "../middlewares/authmiddlewares";
+import upload from "../utils/multer"
+
 
 
 const router=express.Router()
@@ -14,7 +16,9 @@ const adminController=new AdminController(adminService)
 
 router.post("/loginadmin",adminController.adminLogin.bind(adminController))
 router.get("/users",adminController.getAllUsers.bind(adminController))
-router.post("/specialization",adminController.addspecialization.bind(adminController))
+
+router.post("/specialization",upload.single("image") ,adminController.addspecialization.bind(adminController))
+
 router.post("/refresh-token",adminController.refreshToken.bind(adminController))
 router.patch("/:user_id/block-unblock",authMiddleware(['admin']), adminController.blockUnblockUser.bind(adminController))
 router.get('/specialization',  adminController.getAllSpecializations.bind(adminController))

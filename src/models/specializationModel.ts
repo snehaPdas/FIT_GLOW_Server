@@ -8,6 +8,7 @@ const specializationSchema = new Schema<ISpecialization>({
     createdAt: { type: Date, default: Date.now },
     image:{type:String},
     isListed: { type: Boolean, default: true },
+    
   });
   const specializationModel=model<ISpecialization>("ISpecialization",specializationSchema)
   export default specializationModel

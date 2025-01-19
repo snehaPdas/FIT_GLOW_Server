@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import AdminService from "../services/adminService";
 import { LoginAdmin_interface } from "../interface/admin_interface";
 import multer from "multer";
+import { uploadToCloudinary } from "../config/clodinary";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -102,8 +103,15 @@ class AdminController {
     try {
       console.log("reached controller")
       const specializationData = req.body;
-          
-      const specializationresponse = await this.adminService.addSpecialization(specializationData)
+      const imageFile = req.file;
+      let imageUrl: string | null = null;
+         
+      if (imageFile) {
+        const result:any = await uploadToCloudinary(imageFile.buffer, 'specializationImage');
+        imageUrl = result.secure_url;
+      }
+          console.log("specializationData",specializationData)
+      const specializationresponse = await this.adminService.addSpecialization(specializationData,imageUrl)
       res.status(200).json({ message: "Specialization Added sucessfuly", specializationresponse});
       if (!specializationData) {
         res.status(400).json({ message: "Specialization name is required" });

@@ -331,7 +331,7 @@ class UserService {
       return await this.userRepository.getTrainer(trainerId);
     } catch (error) {}
   }
-///////////////////////////////////////////////////////////////////
+
   async checkoutPayment(sessionID:string,userId:string) {
 try {
  
@@ -385,7 +385,7 @@ try {
   async findBookingDetails(session_id: string, user_id: string, stripe_session_id: string) {
     try {
       const session = await this.userRepository.findSessionDetails(session_id);
-      console.log("session issssssssss",session)
+
       if (session) {
         session.status = "Confirmed";
         await session.save();
@@ -428,6 +428,16 @@ try {
       
     } catch (error) {
       console.log("error in fetching userservice",error)
+    }
+  }
+
+  async fetchSpecialization(){
+    console.log("specialization in service")
+    try {
+      const response=this.userRepository.fetchSpecializations()
+      return response
+    } catch (error) {
+      console.log("Error in fetchingspecializations userservice",error)
     }
   }
 }

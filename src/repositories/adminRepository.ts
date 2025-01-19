@@ -41,10 +41,10 @@ class AdminRepository{
         return await this.userModel.find()
 
     }
-    async saveSpecialization({name,description}:{name:string,description:string}){
+    async saveSpecialization({name,description,image}:{name:string,description:string,image:string|null}){
     
          try{
-        return await this.specializationModel.create({name,description})
+        return await this.specializationModel.create({name,description,image})
     }catch(error:any){
         console.error("Error in admin repository:", error);
       throw error

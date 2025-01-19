@@ -46,7 +46,7 @@ class UserController {
     try {
        console.log("verify otp controller");
       const { userData, otp } = req.body;
-       console.log("*************",otp,userData)
+      
       await this.userService.verifyOTP(userData, otp);
 
       res
@@ -71,7 +71,7 @@ class UserController {
     try {
        console.log("verify otp controller");
       const { userData, otp } = req.body;
-       console.log("*************",otp,userData)
+      
       await this.userService.verifyForgotOTP(userData, otp);
 
       res
@@ -144,7 +144,7 @@ async loginUser(req:Request,res:Response,next:NextFunction){
 
 async refreshToken(req:Request,res:Response,next:NextFunction){
 const refresh_token=req.cookies?.refreshToken
-console.log("ït is in cookies.//././/./",refresh_token)
+
 if(!refresh_token){
   res.status(403).json({message:"Refresh Token Not found"})
   return 
@@ -274,9 +274,7 @@ async checkoutPayment(req: Request, res: Response, next: NextFunction){
 
 async createBooking(req: Request, res: Response, next: NextFunction){
   try {
-    console.log(
-      "ytes    reached..............." 
-    )
+   
     const { sessionId, userId , stripe_session_id} = req.body;
     
     const bookingDetails = await this.userService.findBookingDetails(
@@ -290,6 +288,16 @@ async createBooking(req: Request, res: Response, next: NextFunction){
 
 }
 
+async fetchAllSpecializations(req: Request, res: Response, next: NextFunction){
+console.log("fetching specialization in comtrollertr")
+  try {
+    const response=await this.userService.fetchSpecialization()
+    console.log("speci",response)
+    res.status(200).json(response)
+  } catch (error) {
+    console.log("Error in fetching specialization data in controller",error)
+  }
+}
 
 }
 

@@ -95,9 +95,9 @@ class AdminService {
   async addSpecialization(specializationData: {
     name: string;
     description: string;
-  }) {
+  },imageUrl: string | null) {
     const specialization = await this.adminRepository.saveSpecialization({
-      ...specializationData,
+      ...specializationData,image: imageUrl
     });
     return specialization;
   }                                                         
