@@ -4,7 +4,7 @@ import { IBooking } from "../interface/common";
 const bookingSchema=new Schema<IBooking>({
     sessionId:{type:Schema.Types.ObjectId, ref:"Session",required:false},
     trainerId:{type:Schema.Types.ObjectId,ref:"Trainer"},
-    userId:{type:Schema.Types.ObjectId,ref:"User "},
+    userId:{type:Schema.Types.ObjectId,ref:"User"},
     specialization: { type: String, required: false },
     sessionType: { type: String, required: true },
     bookingDate: { type: Date, default: Date.now }, 

@@ -41,6 +41,7 @@ router.get("/specializations/:trainerId",trainerController.getSpecialization.bin
 
 router.post('/session/:trainerId', trainerController.storeSessionData.bind(trainerController))
 router.get('/shedules/:trainerId', trainerController.getSessionSchedules.bind(trainerController))
+router.get(`/bookingdetails/:trainerId`,trainerController.fetchbookingDetails.bind(trainerController))
 
 
 

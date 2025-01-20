@@ -7,6 +7,8 @@ import mongoose, { Types } from "mongoose";
 import KYCModel from "../models/KYC_Models";
 import { ISession } from "../interface/trainer_interface";
 import SessionModel from "../models/sessionModel";
+import BookingModel from "../models/bookingModel";
+import { IBooking } from "../interface/common";
 import moment from "moment";
 
 class TrainerRepository {
@@ -16,6 +18,7 @@ class TrainerRepository {
   private otpModel = OtpModel;
   private kycModel = KYCModel;
   private sessionModel=SessionModel
+  private bookingModel=BookingModel
 
   async existingUser(email: string): Promise<Interface_Trainer | null> {
     try {
@@ -280,71 +283,63 @@ class TrainerRepository {
     }
 
   }
-  async createNewSession(sessiondata:ISession){
+  async createNewSession(sessiondata: ISession) {
     try {
-      console.log("^^^^^^^^^^^^^^^",sessiondata)
-      const findTrainer=await this.trainerModel.findById(sessiondata.trainerId)
-      if(!findTrainer){
-        throw new Error("trainer is not found")
+      // Find trainer
+      const findTrainer = await this.trainerModel.findById(sessiondata.trainerId);
+      if (!findTrainer) {
+        throw new Error("Trainer is not found");
       }
-      const existingSessions=await this.sessionModel.find({trainerId:sessiondata.trainerId,
-        $or:[
-          {
-          startDate:{
-          $gte: sessiondata.startDate,
-          $lte: sessiondata.endDate,
-        }
-      },{
+  
+      // Fetch existing sessions for the same trainer
+      const existingSessions = await this.sessionModel.find({
+        trainerId: sessiondata.trainerId,
         startDate: sessiondata.startDate,
-        endDate: null,
-      }
-      ]
-      })
-      //here--------conflict-----checking------------------
-
-      const hasConflict=existingSessions.some((existingSession)=>{
-        const existingStartDate=moment(existingSession.startDate)
-        const existingEndDate=moment(existingSession.endDate?moment(existingSession.endDate) :existingStartDate)
+        $or: [
+          {
+            endDate: {
+              $gte: sessiondata.startDate,
+            },
+          },
+          {
+            endDate: null,
+          },
+        ],
+      });
+  
+      // Conflict checking
+      const hasConflict = existingSessions.some((existingSession) => {
         const existingStartTime = moment(existingSession.startTime, "HH:mm");
         const existingEndTime = moment(existingSession.endTime, "HH:mm");
-
-        const newStartDate = moment(sessiondata.startDate);
-        const newEndDate = sessiondata.endDate
-          ? moment(sessiondata.endDate)
-          : newStartDate;
-
+  
         const newStartTime = moment(sessiondata.startTime, "HH:mm");
         const newEndTime = moment(sessiondata.endTime, "HH:mm");
-        // Check date and time overlap
-        const dateRangeOverlaps =
-          newStartDate.isSameOrBefore(existingEndDate) &&
-
-          newEndDate.isSameOrAfter(existingStartDate);
-
-        const timeRangeOverlaps =
-          newStartTime.isBefore(existingEndTime) &&
-          newEndTime.isAfter(existingStartTime);
-
-        return dateRangeOverlaps && timeRangeOverlaps;
-
-      })
-      if (hasConflict)
+  
+        // Check time overlap
+        const timeRangeOverlaps = newStartTime.isBefore(existingEndTime) &&
+                                  newEndTime.isAfter(existingStartTime);
+  
+        return timeRangeOverlaps;
+      });
+  
+      if (hasConflict) {
+        console.log("........................")
         throw new Error("Time conflict with an existing session.");
-
+      }
+  
+      // Set the price to a number if not already
       sessiondata.price = Number(sessiondata.price);
-
-      //  session with multiple specializations
-      const createdSessionData = (
-        await this.sessionModel.create(sessiondata)
-      ).populate("specializationId");
-
-      return createdSessionData;
-
+  
+      // Create the session
+      const createdSessionData = await this.sessionModel.create(sessiondata);
+      return createdSessionData.populate("specializationId");
+  
     } catch (error) {
-      console.log("error in Repository",error)
+      console.log("Error in Repository", error);
+      throw error;
     }
-
   }
+  
   async fetchSessionData(trainer_id: string) {
     try {
       const sesseionData = await this.sessionModel
@@ -359,8 +354,20 @@ class TrainerRepository {
       throw error;
     }
   }
-  
 
+  async fecthBookingDetails(trainerId: string){
+try {
+  console.log("booking details repository",trainerId)
+  const bookingDetails=await this.bookingModel.find({trainerId}).populate({path:"userId",select:"name email"}).exec();
+  return bookingDetails
+ 
+} catch (error) {
+  console.log("ërror in fetching booking dewtails",error)
+}
+  }
+  
+ 
 
 }
+
 export default TrainerRepository;

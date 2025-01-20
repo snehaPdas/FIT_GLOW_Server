@@ -195,7 +195,7 @@ async forgotpassword(req:Request,res:Response,next:NextFunction):Promise<any>{
 async resetPassword(req:Request,res:Response,next:NextFunction):Promise<any>{
   try {
      const{userData,payload}=req.body
-     console.log("*$*$*$*$",userData)
+    
      const result=await this.userService.resetapassword(userData,payload)
      console.log("what is the response got?",result)
      if(result?.modifiedCount===1){

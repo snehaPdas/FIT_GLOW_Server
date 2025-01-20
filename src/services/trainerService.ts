@@ -389,9 +389,20 @@ class TrainerService {
       }
      return  await this.trainerRepository.createNewSession(sessiondata)
 
-      }catch(error){
-        console.log("Error in service",error)
-      }
+      }catch(error:any){
+        if (error.message.includes("Daily session limit")) {
+          throw new Error(error.message);
+        } else if (error.message === "Time conflict with an existing session.") {
+          throw new Error("Time conflict with an existing session.");
+        } else if (error.message === "End time must be after start time") {
+          throw new Error("End time must be after start time");
+        } else if (
+          error.message === "Session duration must be at least 30 minutes"
+        ) {
+          throw new Error("Session duration must be at least 30 minutes");
+        } else {
+          throw new Error("Error creating new session");
+        }      }
       
 
      }
@@ -400,6 +411,15 @@ class TrainerService {
         return await this.trainerRepository.fetchSessionData(trainer_id)
       } catch (error) {
         throw new Error("Error getting sessin shedule data");
+      }
+    }
+    async fetchBookingDetails(trainer_id:string){
+      try {
+        console.log("reached trainerbooking service")
+        const response=await this.trainerRepository.fecthBookingDetails(trainer_id)
+        return response
+      } catch (error) {
+        console.log("Error fect booking details",error)
       }
     }
 

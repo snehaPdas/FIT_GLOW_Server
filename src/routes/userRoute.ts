@@ -27,6 +27,7 @@ const userController = new UserController(userService);
  router.get("/schedules",userController.getSessionSchedules.bind(userController))
  router.get("/trainers/:trainerId", userController.getTrainer.bind(userController))
  router.post("/payment/:sessionId", authMiddlewares(['user']), userController.checkoutPayment.bind(userController))
+ 
  router.post("/bookings",userController.createBooking.bind(userController))
  router.get("/specializations",userController.fetchAllSpecializations.bind(userController))
 

@@ -35,7 +35,7 @@ export interface IUser {
     _id?: mongoose.Types.ObjectId;
     sessionId: mongoose.Types.ObjectId;
     trainerId: mongoose.Types.ObjectId;
-    userId: mongoose.Types.ObjectId | undefined; 
+    userId: mongoose.Types.ObjectId |  { name: string; email: string }
     specialization?: string;
     sessionType: string;
     bookingDate: Date;

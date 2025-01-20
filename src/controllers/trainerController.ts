@@ -258,45 +258,60 @@ class TrainerController {
           }
         }
 
-        async storeSessionData(req:Request,res:Response,next:NextFunction){
-          console.log("reached in session place")
-          try{
+          async storeSessionData(req:Request,res:Response,next:NextFunction){
+            console.log("reached in session place")
+            try{
 
-            const {selectedDate,startTime,endTime,startDate,endDate,specialization,price,type,status} =req.body
+              const {selectedDate,startTime,endTime,startDate,endDate,specialization,price,type,status} =req.body
 
-           
-            const trainerId=req.params.trainerId
-            const sessionData:any={}
-            if(type==="Single"){
+            
+              const trainerId=req.params.trainerId
+              const sessionData:any={}
+              if(type==="Single"){
 
-              sessionData.selectedDate=selectedDate,
-              sessionData.startTime=startTime,
-              sessionData.endTime=endTime,
-              sessionData.specialization=specialization
-              sessionData.price=price
-              sessionData.type="single"
-              sessionData.trainerId=trainerId
-            }else{
-              sessionData.specialization=specialization,
-              sessionData.startDate=startDate,
-              sessionData.endDate=endDate,
-              sessionData.startTime=startTime,
-              sessionData.endTime=endTime,
-              sessionData.price=price,
-              sessionData.type="package",
-              sessionData.trainerId=trainerId
+                sessionData.selectedDate=selectedDate,
+                sessionData.startTime=startTime,
+                sessionData.endTime=endTime,
+                sessionData.specialization=specialization
+                sessionData.price=price
+                sessionData.type="single"
+                sessionData.trainerId=trainerId
+              }else{
+                sessionData.specialization=specialization,
+                sessionData.startDate=startDate,
+                sessionData.endDate=endDate,
+                sessionData.startTime=startTime,
+                sessionData.endTime=endTime,
+                sessionData.price=price,
+                sessionData.type="package",
+                sessionData.trainerId=trainerId
 
-            }
-        
-          const sessioncreated=await this.trainerService.storeSessionData(sessionData)
-          res
-          .status(201)
-          .json({ message: "Session created successfully.", sessioncreated });
-
-          }catch(error){
-            console.log("Error in controller while storing session data",error)
-          }
+              }
           
+            const sessioncreated=await this.trainerService.storeSessionData(sessionData)
+            res
+            .status(201)
+            .json({ message: "Session created successfully.", sessioncreated });
+
+            }catch(error:any){
+              if (error.message === "Time conflict with an existing session.") {
+                res
+                  .status(400)
+                  .json({ message: "Time conflict with an existing session." });
+              }  else if (error.message === "End time must be after start time") {
+                res.status(400).json({ message: "End time must be after start time" });
+              } else if (
+                error.message === "Session duration must be at least 30 minutes"
+              ) {
+                res
+                  .status(400)
+                  .json({ message: "Session duration must be at least 30 minutes" });
+              } else {
+                console.error("Detailed server error:", error);
+                next(error)
+              }
+            }
+            
 
 
         }
@@ -314,6 +329,22 @@ class TrainerController {
           } catch (error) {
             console.error("Error saving session data:", error);
            next(error)
+          }
+        }
+
+        async fetchbookingDetails(req: Request, res: Response, next: NextFunction){
+          try {
+            console.log("reached booking details controller")
+            const trainer_id = req.params.trainerId;
+            const bookingDetails=await this.trainerService.fetchBookingDetails(trainer_id)
+            console.log("controller checkinggg",bookingDetails)
+            res.status(200).json({data:bookingDetails})
+          } catch (error) {
+            console.error("Error fetching booking details:", error);
+
+            res.status(500).json({ error: "Failed to fetch booking details." });
+
+            
           }
         }
       
