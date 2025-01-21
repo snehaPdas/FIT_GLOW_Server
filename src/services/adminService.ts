@@ -108,13 +108,18 @@ class AdminService {
   async updatespecialisation(
     name: string,
     description: string,
-    specializationId: string
-  ) {
+    specializationId: string,
+    imageUrl:string
+  ) 
+  
+  {
+    console.log("the new image url is.......",imageUrl)
     const specializationresponse =
       await this.adminRepository.saveupdatespecialization(
         name,
         description,
-        specializationId
+        specializationId,
+        imageUrl
       );
     return specializationresponse;
   }

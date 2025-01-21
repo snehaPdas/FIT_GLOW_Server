@@ -13,6 +13,7 @@ export interface IUser {
     image?: string;
     gender?: string;
     isBlocked: boolean;
+    
   }
 
   export interface IOtp{

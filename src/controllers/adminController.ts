@@ -3,6 +3,7 @@ import AdminService from "../services/adminService";
 import { LoginAdmin_interface } from "../interface/admin_interface";
 import multer from "multer";
 import { uploadToCloudinary } from "../config/clodinary";
+import HTTP_statusCode from "../enums/httpStatusCode";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -28,8 +29,8 @@ class AdminController {
         password,
       });
       
-      if(adminResponse.status===401){
-        res.status(401).json({
+      if(adminResponse.status===HTTP_statusCode.Unauthorized){
+        res.status(HTTP_statusCode.Unauthorized).json({
           message: "Invalid credentials. Login failed.",
         });
       }
@@ -42,7 +43,7 @@ class AdminController {
           secure: true,
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
-        res.status(200).json({
+        res.status(HTTP_statusCode.OK).json({
           message: "Login successful",
           admin: adminResponse.admin,
           token: accessToken,
@@ -51,7 +52,7 @@ class AdminController {
         
        } 
       // else{
-      //   res.status(401).json({
+      //   res.status(HTTP_statusCode.Unauthorized).json({
       //     message: "Invalid credentials. Login failed.",
       //   });
       // }
@@ -66,7 +67,7 @@ class AdminController {
     const admin_refresh_token = req.cookies?.admin_refresh_token;
 
     if (!admin_refresh_token) {
-      res.status(403).json({ message: "Refresh token not found" });
+      res.status(HTTP_statusCode.NoAccess).json({ message: "Refresh token not found" });
       return;
     }
 
@@ -82,7 +83,7 @@ class AdminController {
 
       // console.log('new token', AdminNewAccessToken);
 
-      res.status(200).json({ accessToken: newAccessToken });
+      res.status(HTTP_statusCode.OK).json({ accessToken: newAccessToken });
     } catch (error) {
       console.error("Error generating new access token:", error);
       next(error);
@@ -93,7 +94,7 @@ class AdminController {
     try {
       const allUsers = await this.adminService.getAllUsers();
       res
-        .status(200)
+        .status(HTTP_statusCode.OK)
         .json({ message: "Fetch All users successfully", users: allUsers });
     } catch (error) {
       console.log(error);
@@ -112,9 +113,9 @@ class AdminController {
       }
           console.log("specializationData",specializationData)
       const specializationresponse = await this.adminService.addSpecialization(specializationData,imageUrl)
-      res.status(200).json({ message: "Specialization Added sucessfuly", specializationresponse});
+      res.status(HTTP_statusCode.OK).json({ message: "Specialization Added sucessfuly", specializationresponse});
       if (!specializationData) {
-        res.status(400).json({ message: "Specialization name is required" });
+        res.status(HTTP_statusCode.BadRequest).json({ message: "Specialization name is required" });
       }
     } catch (error) {
       console.log("Error adding specialization", error);
@@ -125,7 +126,7 @@ class AdminController {
     try {
       const allSpecializations = await this.adminService.getAllSpecializations();
 
-      res.status(200).json(allSpecializations);
+      res.status(HTTP_statusCode.OK).json(allSpecializations);
     } catch (error) {
       console.error('Error fetching specializations:', error);
       next(error)
@@ -135,13 +136,29 @@ class AdminController {
   async updatespecialisation(req: Request, res: Response, next: NextFunction){
     
        try {
+        console.log("Request Body: ", req.body);
+        console.log("Uploaded File: ", req.file); 
+        
+      
         const {name,description}=req.body
           const specializationId=req.params.id
-        const response= await this.adminService.updatespecialisation(name,description,specializationId)
+          const imageFile = req.file;
+          let imageUrl: string = "";
+
+             
+          if (imageFile) {
+            const result:any = await uploadToCloudinary(imageFile.buffer, 'specializationImages');
+            imageUrl = result.secure_url;
+            console.log("Uploaded Image URL: ", imageUrl);
+
+          }
+          
+
+        const response= await this.adminService.updatespecialisation(name,description,specializationId,imageUrl)
      // const specialization={name: response?.name,description: response?.description,}
         console.log("response what",response?.name,response?.description)
         const specialization=response
-        res.status(200).json({message:"updatedsuccessfully",specialization})
+        res.status(HTTP_statusCode.OK).json({message:"updatedsuccessfully",specialization})
         
        } catch (error) {
         console.log("the error in controller",error)
@@ -156,7 +173,7 @@ class AdminController {
 
     const responsestatus=await this.adminService.blockUnblockUser(user_id,userState)
     console.log("response data issssss",responsestatus)
-    res.status(200).json({message:"user status updated successfully",data:responsestatus?.isBlocked})
+    res.status(HTTP_statusCode.OK).json({message:"user status updated successfully",data:responsestatus?.isBlocked})
     
 
     }catch(error){
@@ -185,7 +202,7 @@ class AdminController {
       const allTrainersKycData = await this.adminService.TraienrsKycData();
       // console.log(allTrainersKycData);
 
-      res.status(200).json({ message: "Trainers KYC data fetched successfully", data: allTrainersKycData });
+      res.status(HTTP_statusCode.OK).json({ message: "Trainers KYC data fetched successfully", data: allTrainersKycData });
     } catch (error) {
       console.error("Error fetching KYC data:", error);
       next(error)
@@ -201,7 +218,7 @@ class AdminController {
 
       await this.adminService.updateKycStatus(status, trainer_id, rejectionReason);
 
-      res.status(200).json({ message: 'Trainer status updated successfully', status });
+      res.status(HTTP_statusCode.OK).json({ message: 'Trainer status updated successfully', status });
     } catch (error) {
       console.error('Error updating trainer status:', error);
       next(error)

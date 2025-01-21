@@ -54,10 +54,11 @@ async getAllSpecializations() {
     return await this.specializationModel.find()
   }
 
-  async saveupdatespecialization(name:string,description:string,specializationId:string){
+  async saveupdatespecialization(name:string,description:string,specializationId:string,imageUrl:string){
     try{
-
-    const updatedSpecialization=await this.specializationModel.findByIdAndUpdate(specializationId,{name,description},{new:true})
+     console.log("inew image url reached repo",imageUrl)
+     let image=imageUrl
+    const updatedSpecialization=await this.specializationModel.findByIdAndUpdate(specializationId,{name,description,image},{new:true})
     return updatedSpecialization
     }catch(error){
         console.log(error)
