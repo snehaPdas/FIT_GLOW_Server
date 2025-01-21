@@ -40,6 +40,8 @@ router.get('/kycStatus/:trainerId', trainerController.trainerKycStatus.bind(trai
 router.get("/specializations/:trainerId",trainerController.getSpecialization.bind(trainerController))
 
 router.post('/session/:trainerId', trainerController.storeSessionData.bind(trainerController))
+router.put('/edit-session/:sessionId', trainerController.editStoreSessionData.bind(trainerController))
+
 router.get('/shedules/:trainerId', trainerController.getSessionSchedules.bind(trainerController))
 router.get(`/bookingdetails/:trainerId`,trainerController.fetchbookingDetails.bind(trainerController))
 

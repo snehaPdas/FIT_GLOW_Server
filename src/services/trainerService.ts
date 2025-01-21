@@ -423,6 +423,15 @@ class TrainerService {
       }
     }
 
+    async editStoreSessionData(sessionId:string,sessionData:string){
+      try {
+        return await this.trainerRepository.editStoreSessionData(sessionId,sessionData)
+        
+      } catch (error) {
+        console.log("error in editStoreSessionData service",error)
+      }
+
+    }
 
 }
 

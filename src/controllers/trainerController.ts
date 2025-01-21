@@ -347,6 +347,20 @@ class TrainerController {
             
           }
         }
+
+        async editStoreSessionData(req: Request, res: Response, next: NextFunction){
+          try{
+          console.log("reacheddddd edit store sessionnnn")
+          const sessionId = req.params.sessionId;
+          const sessionData=req.body
+          console.log("---------------sessionData",sessionData)
+          console.log("---------------trainer",sessionId )
+          const response=this.trainerService.editStoreSessionData(sessionId,sessionData)
+          res.status(200).json({message:"updated successfully",data:response})
+          }catch(error){
+         console.log("Error in edit session",error)
+          }
+        }
       
         
         

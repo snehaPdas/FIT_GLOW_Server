@@ -365,6 +365,26 @@ try {
   console.log("ërror in fetching booking dewtails",error)
 }
   }
+
+  async editStoreSessionData(sessionId:string,sessionData:any){
+    try {
+      const data = {
+        selectedDate:sessionData.selectedDate,
+        startTime:sessionData.startTime,
+        endTime:sessionData.endTime,
+        price:sessionData.price,
+        endDate:sessionData.endDate
+        
+      }
+      console.log("sessiondata is got in repo",sessionData)
+      const updateSession=await this.sessionModel.findByIdAndUpdate(sessionId,data,{new:true})
+      console.log("updated session is",updateSession)
+      return updateSession
+    } catch (error) {
+      console.log("error in editStoreSessionData repository",error)
+    }
+
+  }
   
  
 
