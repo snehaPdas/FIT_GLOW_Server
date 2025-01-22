@@ -358,7 +358,10 @@ class TrainerRepository {
   async fecthBookingDetails(trainerId: string){
 try {
   console.log("booking details repository",trainerId)
-  const bookingDetails=await this.bookingModel.find({trainerId}).populate({path:"userId",select:"name email"}).exec();
+  
+  const bookingDetails=await  this.bookingModel.find({trainerId}).exec()
+  //.populate({path:"userId",select:"name email",}).exec();
+  console.log("..........booking details",bookingDetails)
   return bookingDetails
  
 } catch (error) {

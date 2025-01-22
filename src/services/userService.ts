@@ -357,7 +357,7 @@ try {
         currency: "INR",
         unit_amount: sessionData?.price* 100 ,
         product_data: {
-          name: "TrainerName",
+           name: sessionData.type,
           description: sessionData.type
               ? `Description: Session from ${sessionData.startTime} to ${sessionData.endTime} on ${startDate.toLocaleDateString()}`
               : `Description: Session from ${sessionData.startTime} to ${sessionData.endTime} on ${startDate.toLocaleDateString()} to ${endDate?.toLocaleDateString()}`,
