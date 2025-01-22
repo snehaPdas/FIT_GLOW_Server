@@ -217,9 +217,9 @@ async createBooking(bookingDetails:IBooking){
 }
 async fetchSpecializations(){
   try {
-    console.log("specialization repo")
+    
     const response=await this.specializationModel.find({})
-    console.log("response of specialization repo",response)
+  
   return response
   } catch (error) {
     console.log("Error in fetching specialization repository",error)

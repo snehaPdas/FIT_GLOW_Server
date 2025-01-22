@@ -432,7 +432,7 @@ try {
   }
 
   async fetchSpecialization(){
-    console.log("specialization in service")
+    
     try {
       const response=this.userRepository.fetchSpecializations()
       return response

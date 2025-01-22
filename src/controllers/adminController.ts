@@ -4,6 +4,7 @@ import { LoginAdmin_interface } from "../interface/admin_interface";
 import multer from "multer";
 import { uploadToCloudinary } from "../config/clodinary";
 import HTTP_statusCode from "../enums/httpStatusCode";
+import responseHelper from "../utils/responseHelper";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -95,7 +96,8 @@ class AdminController {
       const allUsers = await this.adminService.getAllUsers();
       res
         .status(HTTP_statusCode.OK)
-        .json({ message: "Fetch All users successfully", users: allUsers });
+        //.json({ message: "Fetch All users successfully", users: allUsers });
+        .json(responseHelper.successResponse("Fetch All users successfully",{users:allUsers}))
     } catch (error) {
       console.log(error);
     }
@@ -126,7 +128,9 @@ class AdminController {
     try {
       const allSpecializations = await this.adminService.getAllSpecializations();
 
-      res.status(HTTP_statusCode.OK).json(allSpecializations);
+      res.status(HTTP_statusCode.OK)
+      //.json(allSpecializations);
+      .json(responseHelper.successResponse("fetch specialization successfully",allSpecializations))
     } catch (error) {
       console.error('Error fetching specializations:', error);
       next(error)

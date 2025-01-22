@@ -293,7 +293,7 @@ async fetchAllSpecializations(req: Request, res: Response, next: NextFunction){
 console.log("fetching specialization in comtrollertr")
   try {
     const response=await this.userService.fetchSpecialization()
-    console.log("speci",response)
+    
     res.status(HTTP_statusCode.OK).json(response)
   } catch (error) {
     console.log("Error in fetching specialization data in controller",error)
