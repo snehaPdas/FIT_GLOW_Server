@@ -10,6 +10,8 @@ const userSchema=new Schema<IUser>({
    image: { type: String, required: false },
    gender: { type: String, required: false },
    isBlocked: { type: Boolean, default: false },
+   height:{type:String,required:false},
+   weight:{type:String,required:false}
  },
  { timestamps: true }
 )

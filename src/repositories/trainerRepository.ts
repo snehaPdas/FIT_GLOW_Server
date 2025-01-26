@@ -10,8 +10,9 @@ import SessionModel from "../models/sessionModel";
 import BookingModel from "../models/bookingModel";
 import { IBooking } from "../interface/common";
 import moment from "moment";
+import { ITrainerRepository } from "../interface/trainer/Trainer.repository.interface";
 
-class TrainerRepository {
+class TrainerRepository implements  ITrainerRepository{
   
   private specializationModel = SpecializationModel;
   private trainerModel = TrainerModel;

@@ -10,13 +10,16 @@ import { verifyRefreshToken } from "../utils/jwtHelper"
 import stripeClient from "../config/stripeClients";
 import mongoose from "mongoose";
 import stripe from "stripe";
+import { IUserService } from "../interface/user/User.service.interface";
+import { IUserRepository } from "../interface/user/User.repository.interface";
+import {User} from "../interface/user_interface"
 
-class UserService {
-  private userRepository: UserRepository;
+class UserService implements IUserService {
+  private userRepository: IUserRepository;
   private OTP: string | null = null;
   private expiryOTP_time: Date | null = null;
 
-  constructor(userRepository: UserRepository) {
+  constructor(userRepository: IUserRepository) {
     this.userRepository = userRepository;
   }
 
@@ -311,7 +314,7 @@ class UserService {
     console.log("ïn service")
     try {
       const trainers=await this.userRepository.getAllTrainers()
-      const validTrainers=trainers?.filter((trainer)=>trainer.isBlocked===false && trainer.kycStatus==="approved")||[]
+      const validTrainers=trainers?.filter((trainer: { isBlocked: boolean; kycStatus: string; })=>trainer.isBlocked===false && trainer.kycStatus==="approved")||[]
       
       return validTrainers
       
@@ -439,6 +442,31 @@ try {
     } catch (error) {
       console.log("Error in fetchingspecializations userservice",error)
     }
+  }
+  async fechtUserData(userId:string):Promise<User|null>{
+    try {
+     return  await this.userRepository.fetchUserData(userId) 
+    } catch (error) {
+      console.log("Error in fetch Data",error)
+      return null
+    }
+  }
+
+  async editUserData(userId:string,userData:User){
+    try {
+     return  await this.userRepository.editUserData(userId,userData)
+    } catch (error) {
+      console.log("Error in EditUserData in Service",error)
+      
+    }
+  }
+  async getBookedsessionData(userId:string){
+    try {
+     return  await this.userRepository.getBookedsessionData(userId)
+    } catch (error) {
+      console.log("Error in fetching user data session ",error)
+    }
+
   }
 }
 

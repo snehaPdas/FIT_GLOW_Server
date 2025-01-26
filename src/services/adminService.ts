@@ -8,17 +8,20 @@ import {
 import dotenv from "dotenv";
 import sendMail from "../config/email_config";
 import { kyTemplate } from "../config/kyTemplate";
+import { IAdminService } from "../interface/admin/Admin.service.interface";
+import { IUser } from "../interface/common";
+import { IAdminRepository } from "../interface/admin/Admin.repository.interface";
 
 dotenv.config();
 
-class AdminService {
-  private adminRepository: AdminRepository;
+class AdminService implements IAdminService {
+  private adminRepository: IAdminRepository;
 
-  constructor(adminRepository: AdminRepository) {
+  constructor(adminRepository: IAdminRepository) {
     this.adminRepository = adminRepository;
   }
-  async adminLogin({ email, password }: { email: string; password: string }) {
-    try {
+  async adminLogin(email:string,password:string):Promise<any>{
+  try {
       if (
         process.env.ADMIN_EMAIL === email &&
         process.env.ADMIN_PASSWORD === password
@@ -46,17 +49,19 @@ class AdminService {
         return {
           accessToken,
           refreshToken,
+    
           admin: {
             id: adminData._id.toString(),
             email: adminData.email,
             password: adminData.password,
+            
           },
         };
       } else {
         console.log("Invalid admin credentials");
         return {
           status: 401,
-          success: false,
+         success: false,
           message: "Invalid admin credentials",
         };
       }
@@ -88,29 +93,24 @@ class AdminService {
     }
   }
 
-  async getAllUsers() {
+  async getAllUsers() :Promise<any>{
     return await this.adminRepository.fetchAllUsers();
   }
 
   async addSpecialization(specializationData: {
     name: string;
     description: string;
-  },imageUrl: string | null) {
+  },imageUrl: string | null) :Promise<any>{
     const specialization = await this.adminRepository.saveSpecialization({
       ...specializationData,image: imageUrl
     });
     return specialization;
   }                                                         
-  async getAllSpecializations() {
+  async getAllSpecializations():Promise<any> {
     const specializations = await this.adminRepository.getAllSpecializations();
     return specializations;
   }
-  async updatespecialisation(
-    name: string,
-    description: string,
-    specializationId: string,
-    imageUrl:string
-  ) 
+  async updatespecialisation(name: string,description: string,specializationId: string, imageUrl:string) :Promise<any>
   
   {
     console.log("the new image url is.......",imageUrl)
@@ -124,11 +124,11 @@ class AdminService {
     return specializationresponse;
   }
 
-  async blockUnblockUser(user_id: string, userState: boolean) {
+  async blockUnblockUser(user_id: string, userState: boolean):Promise<any> {
     return await this.adminRepository.blockUnblockUser(user_id, userState);
   }
 
-  async fetchKycData(trainerId: string) {
+  async fetchKycData(trainerId: string):Promise<any>{
     try {
       let response = await this.adminRepository.fetchKycData(trainerId);
       console.log("casual checking", response);
@@ -138,7 +138,7 @@ class AdminService {
     }
   }
 
-  async TraienrsKycData() {
+  async TraienrsKycData():Promise<any> {
     try {
       const allTrainersKycDatas =
         await this.adminRepository.getAllTrainersKycDatas();

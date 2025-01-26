@@ -8,8 +8,9 @@ import SessionModel from "../models/sessionModel";
 import { ISpecialization } from "../interface/trainer_interface";
 import BookingModel from "../models/bookingModel";
 import SpecializationModel from "../models/specializationModel";
+import { IUserRepository } from "../interface/user/User.repository.interface";
 
-class UserRepository {
+class UserRepository implements IUserRepository  {
   deleteOtpByEmail(useremail: string) {
     throw new Error("Method not implemented.");
   }
@@ -225,6 +226,47 @@ async fetchSpecializations(){
     console.log("Error in fetching specialization repository",error)
   }
 }
+async fetchUserData(userId:string):Promise<User|null>{
+  try {
+   const user= await this.userModel.findById(userId)
+   return user as User | null; 
+
+  } catch (error) {
+    console.log("Error in Fetching User Data in Repository",error)
+    return null
+  
+  }
+}
+
+async editUserData(userId:string,userData:User){
+  try {
+    const response=await this.userModel.findByIdAndUpdate(userId,userData,{new:true})
+    return response
+  } catch (error) {
+    console.log("Error in UserEdit in Repository",error)
+  }
+
+}
+async getBookedsessionData(userId:string){
+  try {
+    console.log("üser is in repo",userId)
+
+    const bookings=await this.bookingModel.find({userId:userId}).populate("trainerId","name").exec()
+    const response = bookings.map((booking: any) => {
+      return {
+        ...booking.toObject(),  
+        trainerName: booking.trainerId ? booking.trainerId.name : 'Trainer not found',
+      };
+    });
+    console.log("response isssssssss",response)
+
+    return response
+
+  } catch (error) {
+    console.log("Error in fetching userData in repository",error)
+  }
+}
+
 }
 
 export default UserRepository;

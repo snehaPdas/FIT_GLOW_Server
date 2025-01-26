@@ -13,6 +13,8 @@ export interface IUser {
     image?: string;
     gender?: string;
     isBlocked: boolean;
+    height:string,
+    weight:string
     
   }
 

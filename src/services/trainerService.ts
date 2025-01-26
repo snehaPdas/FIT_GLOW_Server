@@ -6,14 +6,16 @@ import bcrypt from "bcrypt"
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwtHelper";
 import { uploadToCloudinary } from "../config/clodinary";
 import { ISession } from "../interface/trainer_interface";
+import { ITrainerService } from "../interface/trainer/Trainer.service.interface";
+import { ITrainerRepository } from "../interface/trainer/Trainer.repository.interface";
 
 
-class TrainerService {
-    private trainerRepository: TrainerRepository;
+class TrainerService implements ITrainerService {
+    private trainerRepository: ITrainerRepository;
     private OTP: string | null = null;
     private expiryOTP_time:Date | null=null
 
-    constructor(trainerRepository: TrainerRepository) {
+    constructor(trainerRepository: ITrainerRepository) {
         this.trainerRepository = trainerRepository;
       }
       async findAllSpecializations() {

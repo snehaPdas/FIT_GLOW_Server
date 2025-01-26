@@ -5,11 +5,15 @@ import { IUser } from "../interface/common";
 import  {jwtDecode} from 'jwt-decode';
 import {JwtPayload} from "../interface/common"
 import HTTP_statusCode from "../enums/httpStatusCode";
+import { IUserService } from "../interface/user/User.service.interface";
+import { triggerAsyncId } from "async_hooks";
+import {CustomRequest} from "../middlewares/authmiddlewares"
+
 
 class UserController {
-  private userService: UserService;
-  constructor(userService: UserService) {
-    this.userService = userService;
+  private userService: IUserService;
+  constructor(userServiceInstance: UserService) {
+    this.userService = userServiceInstance;
   }
 
   async register(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -290,13 +294,47 @@ async createBooking(req: Request, res: Response, next: NextFunction){
 }
 
 async fetchAllSpecializations(req: Request, res: Response, next: NextFunction){
-console.log("fetching specialization in comtrollertr")
+
   try {
     const response=await this.userService.fetchSpecialization()
     
     res.status(HTTP_statusCode.OK).json(response)
   } catch (error) {
     console.log("Error in fetching specialization data in controller",error)
+  }
+}
+async getUser(req: Request, res: Response, next: NextFunction){
+  try {
+    const userId=req.params.userId
+   const response= await this.userService.fechtUserData(userId)
+    res.status(HTTP_statusCode.OK).json({data:response})
+  } catch (error) {
+    
+  }
+
+}
+async editUserData(req: Request, res: Response, next: NextFunction){
+try {
+  const userData=req.body
+  const userId = req.body._id;
+  const response=await this.userService.editUserData(userId,userData)
+  res.status(HTTP_statusCode.OK).json(response)
+} catch (error) {
+  console.log("Error in edit userData",error)
+}
+}
+/////////////
+async getBookedsessionData(req: CustomRequest, res: Response, next: NextFunction){
+console.log("hit")
+  try {
+    //const userId=req.params.userId
+   const userId=req.authData?.id
+    console.log("user id issssssss",userId)
+    const response=await this.userService.getBookedsessionData(userId)
+    
+    res.status(HTTP_statusCode.OK).json({data:response})
+  } catch (error) {
+    console.log("Error while fetching booking details in controller",error)
   }
 }
 

@@ -3,11 +3,15 @@ import HTTP_statusCode from "../enums/httpStatusCode";
 
 import TrainerService from "../services/trainerService"
 import { Interface_Trainer } from "../interface/trainer_interface";
+import {ITrainerService} from "../interface/trainer/Trainer.service.interface"
+
+
+
 class TrainerController {
-    private trainerService: TrainerService;
+    private trainerService: ITrainerService;
   
-    constructor(trainerService: TrainerService) {
-      this.trainerService = trainerService;
+    constructor(trainerServiceInstance: TrainerService) {
+      this.trainerService = trainerServiceInstance;
     }
     async getAllSpecializations(req: Request, res: Response, next: NextFunction) {
         try {

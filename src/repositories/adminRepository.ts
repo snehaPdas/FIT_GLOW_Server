@@ -6,9 +6,10 @@ import mongoose from "mongoose";
 import KYCModel from "../models/KYC_Models";
 import TrainerModel from "../models/trainerModel";
 import KycRejectionReasonModel from "../models/kycRejectionReason";
+import { IAdminRepository } from "../interface/admin/Admin.repository.interface";
 
 
-class AdminRepository{
+class AdminRepository implements IAdminRepository {
 
     private adminModel = AdminModel;
     private userModel = UserModel

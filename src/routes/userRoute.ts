@@ -9,28 +9,34 @@ import isblocked from "../middlewares/userAuth"
 const router=express.Router()
 
 // Set up instances of the repository, service, and controller
-const userRepository = new UserRepository();
-const userService = new UserService(userRepository);
-const userController = new UserController(userService);
+const userRepositoryInstance = new UserRepository();
+const userServiceInstance = new UserService(userRepositoryInstance);
+const userControllerInstance = new UserController(userServiceInstance);
 
 
- router.post("/signup",userController.register.bind(userController))
- router.post("/otp",userController.verifyOtp.bind(userController))
- router.post("/forgototp",userController.verifyForgotOtp.bind(userController))
- router.post("/loginuser",userController.loginUser.bind(userController))
- router.post("/googlesignup",userController.googleSignUpUser.bind(userController))
- router.post("/resendotp",userController.resendOtp.bind(userController))
- router.post("/refresh-token",userController.refreshToken.bind(userController))
- router.post("/forgotpassword",userController.forgotpassword.bind(userController))
- router.post("/resetpassword",userController.resetPassword.bind(userController))
+ router.post("/signup",userControllerInstance.register.bind(userControllerInstance))
+ router.post("/otp",userControllerInstance.verifyOtp.bind(userControllerInstance))
+ router.post("/forgototp",userControllerInstance.verifyForgotOtp.bind(userControllerInstance))
+ router.post("/loginuser",userControllerInstance.loginUser.bind(userControllerInstance))
+ router.post("/googlesignup",userControllerInstance.googleSignUpUser.bind(userControllerInstance))
+ router.post("/resendotp",userControllerInstance.resendOtp.bind(userControllerInstance))
+ router.post("/refresh-token",userControllerInstance.refreshToken.bind(userControllerInstance))
+ router.post("/forgotpassword",userControllerInstance.forgotpassword.bind(userControllerInstance))
+ router.post("/resetpassword",userControllerInstance.resetPassword.bind(userControllerInstance))
 
- router.get("/trainers",isblocked,userController.getAllTrainers.bind(userController))
- router.get("/schedules",isblocked,userController.getSessionSchedules.bind(userController))
- router.get("/trainers/:trainerId",isblocked, userController.getTrainer.bind(userController))
- router.post("/payment/:sessionId", authMiddlewares(['user']), userController.checkoutPayment.bind(userController))
+ router.get("/trainers",isblocked,userControllerInstance.getAllTrainers.bind(userControllerInstance))
+ router.get("/schedules",isblocked,userControllerInstance.getSessionSchedules.bind(userControllerInstance))
+ router.get("/trainers/:trainerId",isblocked, userControllerInstance.getTrainer.bind(userControllerInstance))
+ router.post("/payment/:sessionId",isblocked, authMiddlewares(['user']), userControllerInstance.checkoutPayment.bind(userControllerInstance))
  
- router.post("/bookings",userController.createBooking.bind(userController))
- router.get("/specializations",userController.fetchAllSpecializations.bind(userController))
+ router.post("/bookings",userControllerInstance.createBooking.bind(userControllerInstance))
+ router.get("/specializations",userControllerInstance.fetchAllSpecializations.bind(userControllerInstance))
+ router.get('/users/:userId',userControllerInstance.getUser.bind(userControllerInstance))
+ router.patch("/users",userControllerInstance.editUserData.bind(userControllerInstance))
+ router.patch("/booking-details",authMiddlewares(['user']),userControllerInstance.getBookedsessionData.bind(userControllerInstance))
+
+
+
 
 
 

@@ -1,10 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import AdminService from "../services/adminService";
+
+//import AdminService from "../services/adminService"
+
 import { LoginAdmin_interface } from "../interface/admin_interface";
 import multer from "multer";
 import { uploadToCloudinary } from "../config/clodinary";
 import HTTP_statusCode from "../enums/httpStatusCode";
 import responseHelper from "../utils/responseHelper";
+import { IAdminService } from "../interface/admin/Admin.service.interface";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -12,23 +15,18 @@ const upload = multer({ storage });
 import { jwtDecode } from "jwt-decode";
 
 class AdminController {
-  private adminService: AdminService;
-  constructor(adminService: AdminService) {
-    this.adminService = adminService;
+
+  private adminService: IAdminService;
+
+  constructor(adminServiceInstance: IAdminService) {
+    this.adminService = adminServiceInstance;
   }
 
-  async adminLogin(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<any> {
+  async adminLogin( req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
       const { email, password }: LoginAdmin_interface = req.body;
 
-      const adminResponse = await this.adminService.adminLogin({
-        email,
-        password,
-      });
+      const adminResponse = await this.adminService.adminLogin(email,password,);
       
       if(adminResponse.status===HTTP_statusCode.Unauthorized){
         res.status(HTTP_statusCode.Unauthorized).json({
@@ -91,7 +89,7 @@ class AdminController {
     }
   }
 
-  async getAllUsers(req: Request, res: Response, next: NextFunction) {
+  async getAllUsers(req: Request, res: Response, next: NextFunction):Promise<void> {
     try {
       const allUsers = await this.adminService.getAllUsers();
       res
@@ -102,7 +100,7 @@ class AdminController {
       console.log(error);
     }
   }
-  async addspecialization(req: Request, res: Response, next: NextFunction) {
+  async addspecialization(req: Request, res: Response, next: NextFunction):Promise<void> {
     try {
       console.log("reached controller")
       const specializationData = req.body;
@@ -160,7 +158,7 @@ class AdminController {
 
         const response= await this.adminService.updatespecialisation(name,description,specializationId,imageUrl)
      // const specialization={name: response?.name,description: response?.description,}
-        console.log("response what",response?.name,response?.description)
+        
         const specialization=response
         res.status(HTTP_statusCode.OK).json({message:"updatedsuccessfully",specialization})
         
@@ -188,7 +186,6 @@ class AdminController {
   async trainersKycData(req: Request, res: Response, next: NextFunction):Promise<any>{
     try {
       const trainerId = req.params.trainer_id;
-      console.log("-----****************><><><>----",trainerId)
       const trainerKycDetails = await this.adminService.fetchKycData(trainerId);
       console.log("response check",trainerKycDetails)
       return res.json({ kycData: trainerKycDetails });

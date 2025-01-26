@@ -10,22 +10,22 @@ import upload from "../utils/multer"
 const router=express.Router()
 
 //instance creation
-const adminRepository=new AdminRepository()
-const adminService =new AdminService(adminRepository)
-const adminController=new AdminController(adminService)
+const adminRepositoryInstance=new AdminRepository()
+const adminServiceInstance =new AdminService(adminRepositoryInstance)
+const adminControllerInstance=new AdminController(adminServiceInstance)
 
-router.post("/loginadmin",adminController.adminLogin.bind(adminController))
-router.get("/users",adminController.getAllUsers.bind(adminController))
+router.post("/loginadmin",adminControllerInstance.adminLogin.bind(adminControllerInstance))
+router.get("/users",adminControllerInstance.getAllUsers.bind(adminControllerInstance))
 
-router.post("/specialization",upload.single("image") ,adminController.addspecialization.bind(adminController))
+router.post("/specialization",upload.single("image") ,adminControllerInstance.addspecialization.bind(adminControllerInstance))
 
-router.post("/refresh-token",adminController.refreshToken.bind(adminController))
-router.patch("/:user_id/block-unblock",authMiddleware(['admin']), adminController.blockUnblockUser.bind(adminController))
-router.get('/specialization',  adminController.getAllSpecializations.bind(adminController))
-router.put("/specialization/:id",upload.single("image"),adminController.updatespecialisation.bind(adminController))
-router.get('/trainers/kyc', adminController.getAllTrainersKycDatas.bind(adminController))
-router.get('/trainers/kyc/:trainer_id', adminController.trainersKycData.bind(adminController));
-router.patch('/kyc-status-update/:trainer_id', authMiddleware(['admin']), adminController.changeKycStatus.bind(adminController));
+router.post("/refresh-token",adminControllerInstance.refreshToken.bind(adminControllerInstance))
+router.patch("/:user_id/block-unblock",authMiddleware(['admin']), adminControllerInstance.blockUnblockUser.bind(adminControllerInstance))
+router.get('/specialization',  adminControllerInstance.getAllSpecializations.bind(adminControllerInstance))
+router.put("/specialization/:id",upload.single("image"),adminControllerInstance.updatespecialisation.bind(adminControllerInstance))
+router.get('/trainers/kyc', adminControllerInstance.getAllTrainersKycDatas.bind(adminControllerInstance))
+router.get('/trainers/kyc/:trainer_id', adminControllerInstance.trainersKycData.bind(adminControllerInstance));
+router.patch('/kyc-status-update/:trainer_id', authMiddleware(['admin']), adminControllerInstance.changeKycStatus.bind(adminControllerInstance));
 
 
 export default router;
