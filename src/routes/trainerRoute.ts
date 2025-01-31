@@ -44,6 +44,9 @@ router.put('/edit-session/:sessionId', trainerControllerInstance.editStoreSessio
 
 router.get('/shedules/:trainerId', trainerControllerInstance.getSessionSchedules.bind(trainerControllerInstance))
 router.get(`/bookingdetails/:trainerId`,trainerControllerInstance.fetchbookingDetails.bind(trainerControllerInstance))
+router.get('/:trainerId',  trainerControllerInstance.getTrainer.bind(trainerControllerInstance))
+router.get('/users/:userId',  trainerControllerInstance.fetchUser.bind(trainerControllerInstance))
+
 
 
 

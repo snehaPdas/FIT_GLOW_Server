@@ -242,6 +242,7 @@ async getSessionSchedules(req: Request, res: Response, next: NextFunction) {
 }
 
 async getTrainer(req: Request, res: Response, next: NextFunction) {
+
   try {
     
     const trainerId = req.params.trainerId;
@@ -325,7 +326,7 @@ try {
 }
 /////////////
 async getBookedsessionData(req: CustomRequest, res: Response, next: NextFunction){
-console.log("hit")
+
   try {
     //const userId=req.params.userId
    const userId=req.authData?.id

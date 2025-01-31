@@ -251,11 +251,12 @@ async getBookedsessionData(userId:string){
   try {
     console.log("üser is in repo",userId)
 
-    const bookings=await this.bookingModel.find({userId:userId}).populate("trainerId","name").exec()
+    const bookings=await this.bookingModel.find({userId:userId}).populate("trainerId","name profileImage").exec()
     const response = bookings.map((booking: any) => {
       return {
         ...booking.toObject(),  
         trainerName: booking.trainerId ? booking.trainerId.name : 'Trainer not found',
+        profileImage:booking.trainerId ? booking.trainerId.profileImage:"Trainer not found"
       };
     });
     console.log("response isssssssss",response)

@@ -23,5 +23,6 @@ export interface ITrainerRepository{
     fetchSessionData(trainer_id: string):Promise<any>
     fecthBookingDetails(trainerId: string):Promise<any>
     editStoreSessionData(sessionId:string,sessionData:any):Promise<any>
-
+    fetchTrainer(trainer_id:string):Promise<any>
+    fetchUeserDetails(userId:string):Promise<any>
 }

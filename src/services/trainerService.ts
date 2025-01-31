@@ -434,6 +434,18 @@ class TrainerService implements ITrainerService {
       }
 
     }
+    async findTrainer(trainer_id: string) {
+      try {
+        return await this.trainerRepository.fetchTrainer(trainer_id);
+      } catch (error: any) {
+        throw Error(error);
+      }
+    }
+
+    async fetchUser(userId: string) {
+      return await this.trainerRepository.fetchUeserDetails(userId)
+    }
+  
 
 }
 

@@ -19,6 +19,6 @@ export interface ITrainerService{
     getSessionShedules(trainer_id:string):Promise<any>
     fetchBookingDetails(trainerId:string):Promise<any>
     editStoreSessionData(sessionId:string,sessionData:string):Promise<any>
-
-
+    findTrainer(trainer_id:string):Promise<any>
+    fetchUser(userId:string):Promise<any>
 }

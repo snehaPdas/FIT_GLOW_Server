@@ -4,6 +4,8 @@ import connectDB from "./utils/db"
 import userRoute from "../src/routes/userRoute"
 import adminRoute from "../src/routes/adminRoute"
 import trainerRoute from "../src/routes/trainerRoute"
+import MessagesRoute from "../src/routes/messageRoute";
+
 import dotenv from 'dotenv';
 import path from "path";
 import cors from 'cors'
@@ -37,6 +39,8 @@ app.use(cookieParser())
 app.use("/api/user/", userRoute);
 app.use("/api/admin/", adminRoute);
 app.use("/api/trainer/",trainerRoute)
+app.use("/api/messages/", MessagesRoute);
+
 
 
 console.log('hit index'); 

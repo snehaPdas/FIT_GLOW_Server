@@ -11,6 +11,7 @@ import BookingModel from "../models/bookingModel";
 import { IBooking } from "../interface/common";
 import moment from "moment";
 import { ITrainerRepository } from "../interface/trainer/Trainer.repository.interface";
+import UserModel from "../models/userModel";
 
 class TrainerRepository implements  ITrainerRepository{
   
@@ -360,9 +361,15 @@ class TrainerRepository implements  ITrainerRepository{
 try {
   console.log("booking details repository",trainerId)
   
-  const bookingDetails=await  this.bookingModel.find({trainerId}).exec()
+  const bookingDetails=await  this.bookingModel.find({trainerId}).populate("userId","name").exec()
   //.populate({path:"userId",select:"name email",}).exec();
-  console.log("..........booking details",bookingDetails)
+  const response = bookingDetails.map((booking: any) => {
+    return {
+      ...booking.toObject(),  
+      userName: booking.userId ? booking.userId.name : 'user not found',
+    
+    };
+  });
   return bookingDetails
  
 } catch (error) {
@@ -390,8 +397,36 @@ try {
 
   }
   
- 
+  async fetchTrainer(trainer_id: string) {
+    try {
+      const trainerData = await this.trainerModel.aggregate([
+        {
+          $match: { _id: new mongoose.Types.ObjectId(trainer_id) },
+        },
+        {
+          $lookup: {
+            from: "specializations",
+            localField: "specializations",
+            foreignField: "_id",
+            as: "specializationDetails",
+          },
+        },
+      ]);
 
+      // console.log('trainerData', trainerData);
+      return trainerData;
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  }
+  async fetchUeserDetails(userId: string) {
+    try {
+      const userData = await UserModel.findById(userId);
+      return userData;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default TrainerRepository;

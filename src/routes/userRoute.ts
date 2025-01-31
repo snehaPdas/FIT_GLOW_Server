@@ -26,14 +26,14 @@ const userControllerInstance = new UserController(userServiceInstance);
 
  router.get("/trainers",isblocked,userControllerInstance.getAllTrainers.bind(userControllerInstance))
  router.get("/schedules",isblocked,userControllerInstance.getSessionSchedules.bind(userControllerInstance))
- router.get("/trainers/:trainerId",isblocked, userControllerInstance.getTrainer.bind(userControllerInstance))
+ router.get("/trainers/:trainerId", userControllerInstance.getTrainer.bind(userControllerInstance))
  router.post("/payment/:sessionId",isblocked, authMiddlewares(['user']), userControllerInstance.checkoutPayment.bind(userControllerInstance))
  
  router.post("/bookings",userControllerInstance.createBooking.bind(userControllerInstance))
  router.get("/specializations",userControllerInstance.fetchAllSpecializations.bind(userControllerInstance))
  router.get('/users/:userId',userControllerInstance.getUser.bind(userControllerInstance))
  router.patch("/users",userControllerInstance.editUserData.bind(userControllerInstance))
- router.patch("/booking-details",authMiddlewares(['user']),userControllerInstance.getBookedsessionData.bind(userControllerInstance))
+ router.get("/booking-details",authMiddlewares(['user']),userControllerInstance.getBookedsessionData.bind(userControllerInstance))
 
 
 

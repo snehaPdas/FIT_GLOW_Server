@@ -366,7 +366,28 @@ class TrainerController {
          console.log("Error in edit session",error)
           }
         }
-      
+
+        async getTrainer(req: Request, res: Response, next: NextFunction) {
+          try {
+            const trainer_id = req.params.trainerId;
+            console.log("++++++++++",trainer_id)
+            const trainerData = await this.trainerService.findTrainer(trainer_id);
+            res.status(200).json({
+              trainerData: trainerData,
+            });
+          } catch (error: any) {
+            next(error)
+          }
+        }
+        async fetchUser(req: Request, res: Response, next: NextFunction) {
+          try {
+            const userId=req.params.userId
+            const userData = await this.trainerService.fetchUser(userId)
+            res.status(200).json(userData)
+          } catch (error) {
+            next(error)
+          }
+        }
         
         
 }
