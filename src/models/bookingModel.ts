@@ -1,6 +1,5 @@
 import mongoose, { Schema,model } from "mongoose";
 import { IBooking } from "../interface/common";
-
 const bookingSchema=new Schema<IBooking>({
     sessionId:{type:Schema.Types.ObjectId, ref:"Session",required:false},
     trainerId:{type:Schema.Types.ObjectId,ref:"Trainer"},
@@ -15,10 +14,6 @@ const bookingSchema=new Schema<IBooking>({
     amount: { type: Number, required: true },
     paymentStatus: { type: String, enum: [ "Confirmed", "Cancelled", "Completed"], default: "Confirmed" }, 
     payment_intent: {type: String, required: false },
-
-
 })
-
-
 const BookingModel =model<IBooking>("Booking",bookingSchema)
 export default BookingModel;

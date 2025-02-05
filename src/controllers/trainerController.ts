@@ -8,15 +8,15 @@ import {ITrainerService} from "../interface/trainer/Trainer.service.interface"
 
 
 class TrainerController {
-    private trainerService: ITrainerService;
+    private _trainerService: ITrainerService;
   
     constructor(trainerServiceInstance: TrainerService) {
-      this.trainerService = trainerServiceInstance;
+      this._trainerService = trainerServiceInstance;
     }
     async getAllSpecializations(req: Request, res: Response, next: NextFunction) {
         try {
       
-            const specializationsData =  await this.trainerService.findAllSpecializations();
+            const specializationsData =  await this._trainerService.findAllSpecializations();
             console.log("specialisationdaTA",specializationsData)
             res.status(HTTP_statusCode.OK).json({ success: true, data: specializationsData });
           } catch (error) {
@@ -32,7 +32,7 @@ class TrainerController {
         try {
           const trainerData: Interface_Trainer = req.body;
            console.log("datass",trainerData)
-          const trainer = await this.trainerService.registerTrainer(trainerData);
+          const trainer = await this._trainerService.registerTrainer(trainerData);
     
           res.status(HTTP_statusCode.OK).json({ message: "OTP sent to email" });
           
@@ -52,7 +52,7 @@ class TrainerController {
         try{
        let {trainerData,otp}=req.body
        console.log("the otp entered from frontend",otp)
-       await this.trainerService.verifyOtp(trainerData,otp)
+       await this._trainerService.verifyOtp(trainerData,otp)
        res.status(HTTP_statusCode.OK).json({message:"OTP Veified Successfully",trainer:trainerData})
         }catch(error){
           console.error("OTP Verification Controller error:", error);
@@ -75,7 +75,7 @@ class TrainerController {
           const { email } = req.body;
           // console.log(email,'trainer cont');
     
-          await this.trainerService.resendOTP(email);
+          await this._trainerService.resendOTP(email);
           res.status(HTTP_statusCode.OK).json({ message: "OTP resent successfully" });
         } catch (error) {
           console.error("Resend OTP Controller error:", error);
@@ -94,7 +94,7 @@ class TrainerController {
            console.log("verify otp controller");
           const { userData, otp } = req.body;
            console.log("*************",otp,userData)
-          await this.trainerService.verifyForgotOTP(userData, otp);
+          await this._trainerService.verifyForgotOTP(userData, otp);
     
           res
             .status(HTTP_statusCode.OK)
@@ -118,11 +118,13 @@ class TrainerController {
         try {
           console.log("-----reached here")
           const {email,password}=req.body
-   let user=await this.trainerService.LoginTrainer(email,password)
+   let user=await this._trainerService.LoginTrainer(email,password)
+    
+
    if(user){
     const {accessToken,refreshToken}=user
      ///set Refresh token in the cookie and sent 
-  
+        
 
      res.cookie("refreshToken",refreshToken,{
       httpOnly:true,
@@ -157,7 +159,7 @@ class TrainerController {
           return 
         }
         try {
-          const newAccessToken=await this.trainerService.generateNewAccessToken(refresh_token)
+          const newAccessToken=await this._trainerService.generateNewAccessToken(refresh_token)
           const UserNewAccessToken=Object.assign({},{accessToken:newAccessToken})
           res.status(HTTP_statusCode.OK).json({accessToken:UserNewAccessToken})
         
@@ -172,7 +174,7 @@ class TrainerController {
           try {
             const {emailData}=req.body
             console.log("got email from body",emailData)
-            const response=await this.trainerService.forgotpassword(emailData)
+            const response=await this._trainerService.forgotpassword(emailData)
             console.log("noll",response)
             if(!response){
               return res.status(HTTP_statusCode.BadRequest).json({message:"email not found"})
@@ -182,13 +184,15 @@ class TrainerController {
         
           } catch (error) {
             console.log("Error in Forgot password",error)
+            next(error)
+
           }
         }
         async resetPassword(req:Request,res:Response,next:NextFunction):Promise<any>{
           try {
              const{userData,payload}=req.body
              console.log("*$*$*$*$",userData)
-             const result=await this.trainerService.resetapassword(userData,payload)
+             const result=await this._trainerService.resetapassword(userData,payload)
              console.log("what is the response got?",result)
              if(result?.modifiedCount===1){
               return res.status(HTTP_statusCode.OK).json({ message: "Password reset successfully" });
@@ -200,7 +204,9 @@ class TrainerController {
         
           } catch (error) {
             console.log("User Controller Error",error)
+            next(error)
             return res.status(500).json({ message: "Server Error" });
+
         
           }
         }
@@ -225,7 +231,7 @@ class TrainerController {
 
 
             // Pass formData and uploaded files to the service for KYC submission
-            const kycStatus = await this.trainerService.kycSubmit(formData, files);
+            const kycStatus = await this._trainerService.kycSubmit(formData, files);
         
             // Return success response with KYC status
             res.status(HTTP_statusCode.OK).json({ message: "KYC submitted successfully", kycStatus });
@@ -238,7 +244,7 @@ class TrainerController {
         async trainerKycStatus(req: Request, res: Response, next: NextFunction) {
           try {
             const trainerId = req.params.trainerId;
-            const kycStatus = await this.trainerService.kycStatus(trainerId);
+            const kycStatus = await this._trainerService.kycStatus(trainerId);
       
             res.status(HTTP_statusCode.OK).json({ kycStatus });
           } catch (error) {
@@ -252,14 +258,14 @@ class TrainerController {
           try {
             const trainerId=req.params.trainerId
             console.log("trainer id for specialization",trainerId)
-            const specialisations=await this .trainerService.getSpecialization(trainerId)
+            const specialisations=await this ._trainerService.getSpecialization(trainerId)
             
              res.status(HTTP_statusCode.OK).json({message:"specialisation fetched successfully",data:specialisations})
             
           } catch (error) {
-            console.log(
-              "Error in contoller",error
-            )
+            console.log("Error in contoller",error)
+            next(error)
+            
           }
         }
 
@@ -293,7 +299,7 @@ class TrainerController {
 
               }
           
-            const sessioncreated=await this.trainerService.storeSessionData(sessionData)
+            const sessioncreated=await this._trainerService.storeSessionData(sessionData)
             res
             .status(HTTP_statusCode.updated)
             .json({ message: "Session created successfully.", sessioncreated });
@@ -323,7 +329,7 @@ class TrainerController {
         async getSessionSchedules(req: Request, res: Response, next: NextFunction) {
           try {
             const trainer_id = req.params.trainerId;
-            const sheduleData = await this.trainerService.getSessionShedules(
+            const sheduleData = await this._trainerService.getSessionShedules(
               trainer_id
             );
             console.log('sheduleData',sheduleData);
@@ -341,7 +347,7 @@ class TrainerController {
           try {
             console.log("reached booking details controller")
             const trainer_id = req.params.trainerId;
-            const bookingDetails=await this.trainerService.fetchBookingDetails(trainer_id)
+            const bookingDetails=await this._trainerService.fetchBookingDetails(trainer_id)
             console.log("controller checkinggg",bookingDetails)
             res.status(HTTP_statusCode.OK).json({data:bookingDetails})
           } catch (error) {
@@ -360,18 +366,20 @@ class TrainerController {
           const sessionData=req.body
           console.log("---------------sessionData",sessionData)
           console.log("---------------trainer",sessionId )
-          const response=this.trainerService.editStoreSessionData(sessionId,sessionData)
+          const response=this._trainerService.editStoreSessionData(sessionId,sessionData)
           res.status(HTTP_statusCode.OK).json({message:"updated successfully",data:response})
           }catch(error){
          console.log("Error in edit session",error)
+         next(error)
+
           }
         }
 
         async getTrainer(req: Request, res: Response, next: NextFunction) {
           try {
             const trainer_id = req.params.trainerId;
-            console.log("++++++++++",trainer_id)
-            const trainerData = await this.trainerService.findTrainer(trainer_id);
+            
+            const trainerData = await this._trainerService.findTrainer(trainer_id);
             res.status(200).json({
               trainerData: trainerData,
             });
@@ -382,7 +390,7 @@ class TrainerController {
         async fetchUser(req: Request, res: Response, next: NextFunction) {
           try {
             const userId=req.params.userId
-            const userData = await this.trainerService.fetchUser(userId)
+            const userData = await this._trainerService.fetchUser(userId)
             res.status(200).json(userData)
           } catch (error) {
             next(error)

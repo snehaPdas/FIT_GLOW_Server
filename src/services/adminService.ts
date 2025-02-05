@@ -1,5 +1,5 @@
-import AdminRepository from "../repositories/adminRepository";
-import UserRepository from "../repositories/userRepository";
+// import AdminRepository from "../repositories/adminRepository";
+// import UserRepository from "../repositories/userRepository";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -9,16 +9,16 @@ import dotenv from "dotenv";
 import sendMail from "../config/email_config";
 import { kyTemplate } from "../config/kyTemplate";
 import { IAdminService } from "../interface/admin/Admin.service.interface";
-import { IUser } from "../interface/common";
+// import { IUser } from "../interface/common";
 import { IAdminRepository } from "../interface/admin/Admin.repository.interface";
 
 dotenv.config();
 
 class AdminService implements IAdminService {
-  private adminRepository: IAdminRepository;
+  private _adminRepository: IAdminRepository;
 
   constructor(adminRepository: IAdminRepository) {
-    this.adminRepository = adminRepository;
+    this._adminRepository = adminRepository;
   }
   async adminLogin(email:string,password:string):Promise<any>{
   try {
@@ -28,11 +28,11 @@ class AdminService implements IAdminService {
       ) {
         console.log("Credentials matched");
 
-        let adminData: any = await this.adminRepository.findAdmin(email);
+        let adminData: any = await this._adminRepository.findAdmin(email);
 
         if (!adminData) {
           console.log("Admin does not exist, creating admin...");
-          adminData = await this.adminRepository.createAdmin(email, password);
+          adminData = await this._adminRepository.createAdmin(email, password);
         }
 
         // Generate access and refresh tokens
@@ -94,43 +94,69 @@ class AdminService implements IAdminService {
   }
 
   async getAllUsers() :Promise<any>{
-    return await this.adminRepository.fetchAllUsers();
+    try{
+      return await this._adminRepository.fetchAllUsers();
+
+    }catch(error){
+      console.log("Error in add specialization in service",error )
+    }
   }
 
-  async addSpecialization(specializationData: {
-    name: string;
-    description: string;
-  },imageUrl: string | null) :Promise<any>{
-    const specialization = await this.adminRepository.saveSpecialization({
-      ...specializationData,image: imageUrl
-    });
-    return specialization;
-  }                                                         
+  async addSpecialization(specializationData: { name: string; description: string;},imageUrl: string | null) :Promise<any>{
+    try{
+      const specialization = await this._adminRepository.saveSpecialization({
+        ...specializationData,image: imageUrl
+      });
+      return specialization;
+    }catch(error:any){
+    
+      throw new Error(error.message)
+
+      console.log(error)
+    }
+   
+  }  
+
   async getAllSpecializations():Promise<any> {
-    const specializations = await this.adminRepository.getAllSpecializations();
-    return specializations;
+    try{
+      const specializations = await this._adminRepository.getAllSpecializations();
+      return specializations;
+    }catch(error){
+      console.log(error)
+    }
+   
   }
   async updatespecialisation(name: string,description: string,specializationId: string, imageUrl:string) :Promise<any>
   
   {
-    console.log("the new image url is.......",imageUrl)
-    const specializationresponse =
-      await this.adminRepository.saveupdatespecialization(
-        name,
-        description,
-        specializationId,
-        imageUrl
-      );
-    return specializationresponse;
+    try{
+      console.log("the new image url is.......",imageUrl)
+      const specializationresponse =
+        await this._adminRepository.saveupdatespecialization(
+          name,
+          description,
+          specializationId,
+          imageUrl
+        );
+      return specializationresponse;
+    }catch(error){
+      console.log(error)
+    }
+   
   }
 
   async blockUnblockUser(user_id: string, userState: boolean):Promise<any> {
-    return await this.adminRepository.blockUnblockUser(user_id, userState);
+    try{
+      return await this._adminRepository.blockUnblockUser(user_id, userState);
+
+    }catch(error){
+      console.log(error)
+    }
   }
 
   async fetchKycData(trainerId: string):Promise<any>{
     try {
-      let response = await this.adminRepository.fetchKycData(trainerId);
+      let response = await this._adminRepository.fetchKycData(trainerId);
       console.log("casual checking", response);
       return response;
     } catch (error) {
@@ -141,7 +167,7 @@ class AdminService implements IAdminService {
   async TraienrsKycData():Promise<any> {
     try {
       const allTrainersKycDatas =
-        await this.adminRepository.getAllTrainersKycDatas();
+        await this._adminRepository.getAllTrainersKycDatas();
       // console.log('allTrainersKycDatas',allTrainersKycDatas);
 
       return allTrainersKycDatas;
@@ -157,7 +183,7 @@ class AdminService implements IAdminService {
     rejectionReason: string | null
   ): Promise<void> {
     try {
-      const updatedKyc = await this.adminRepository.updateKycStatus(
+      const updatedKyc = await this._adminRepository.updateKycStatus(
         status,
         trainer_id,
         rejectionReason
@@ -165,7 +191,7 @@ class AdminService implements IAdminService {
       console.log("simply checkingggg datas", updatedKyc);
 
       if (status === "approved" || status === "rejected") {
-        await this.adminRepository.deleteKyc(trainer_id);
+        await this._adminRepository.deleteKyc(trainer_id);
         console.log(`KYC data deleted for trainer ID: ${trainer_id}`);
       }
 

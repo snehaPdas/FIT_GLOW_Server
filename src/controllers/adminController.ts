@@ -12,21 +12,21 @@ import { IAdminService } from "../interface/admin/Admin.service.interface";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-import { jwtDecode } from "jwt-decode";
+
 
 class AdminController {
 
-  private adminService: IAdminService;
+  private _adminService: IAdminService;
 
   constructor(adminServiceInstance: IAdminService) {
-    this.adminService = adminServiceInstance;
+    this._adminService = adminServiceInstance;
   }
 
   async adminLogin( req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
       const { email, password }: LoginAdmin_interface = req.body;
 
-      const adminResponse = await this.adminService.adminLogin(email,password,);
+      const adminResponse = await this._adminService.adminLogin(email,password,);
       
       if(adminResponse.status===HTTP_statusCode.Unauthorized){
         res.status(HTTP_statusCode.Unauthorized).json({
@@ -56,7 +56,7 @@ class AdminController {
       //   });
       // }
       
-    } catch (error:any) {
+    } catch (error:any) {//avoid
       console.log("admin loggin controller Error", error);
     next(error);
         }
@@ -71,7 +71,7 @@ class AdminController {
     }
 
     try {
-      const newAccessToken = await this.adminService.generateTokn(
+      const newAccessToken = await this._adminService.generateTokn(
         admin_refresh_token
       );
 
@@ -91,7 +91,7 @@ class AdminController {
 
   async getAllUsers(req: Request, res: Response, next: NextFunction):Promise<void> {
     try {
-      const allUsers = await this.adminService.getAllUsers();
+      const allUsers = await this._adminService.getAllUsers();
       res
         .status(HTTP_statusCode.OK)
         //.json({ message: "Fetch All users successfully", users: allUsers });
@@ -112,19 +112,21 @@ class AdminController {
         imageUrl = result.secure_url;
       }
           console.log("specializationData",specializationData)
-      const specializationresponse = await this.adminService.addSpecialization(specializationData,imageUrl)
+      const specializationresponse = await this._adminService.addSpecialization(specializationData,imageUrl)
       res.status(HTTP_statusCode.OK).json({ message: "Specialization Added sucessfuly", specializationresponse});
       if (!specializationData) {
         res.status(HTTP_statusCode.BadRequest).json({ message: "Specialization name is required" });
       }
-    } catch (error) {
+    } catch (error:any) {
+      res.status(400).json({ success: false, message: error.message });
+      next(error)
       console.log("Error adding specialization", error);
     }
   }
 
   async getAllSpecializations(req: Request, res: Response, next: NextFunction) {
     try {
-      const allSpecializations = await this.adminService.getAllSpecializations();
+      const allSpecializations = await this._adminService.getAllSpecializations();
 
       res.status(HTTP_statusCode.OK)
       //.json(allSpecializations);
@@ -156,13 +158,14 @@ class AdminController {
           }
           
 
-        const response= await this.adminService.updatespecialisation(name,description,specializationId,imageUrl)
+        const response= await this._adminService.updatespecialisation(name,description,specializationId,imageUrl)
      // const specialization={name: response?.name,description: response?.description,}
         
         const specialization=response
         res.status(HTTP_statusCode.OK).json({message:"updatedsuccessfully",specialization})
         
        } catch (error) {
+        next(error)
         console.log("the error in controller",error)
        }
   }
@@ -173,34 +176,37 @@ class AdminController {
     const user_id=req.params.user_id
     const userState=req.body.status
 
-    const responsestatus=await this.adminService.blockUnblockUser(user_id,userState)
+    const responsestatus=await this._adminService.blockUnblockUser(user_id,userState)
     console.log("response data issssss",responsestatus)
     res.status(HTTP_statusCode.OK).json({message:"user status updated successfully",data:responsestatus?.isBlocked})
     
 
     }catch(error){
     console.log("Error in controller userblockunblock ",error)
+    next(error)
+
     }
   }
 
   async trainersKycData(req: Request, res: Response, next: NextFunction):Promise<any>{
     try {
       const trainerId = req.params.trainer_id;
-      const trainerKycDetails = await this.adminService.fetchKycData(trainerId);
+      const trainerKycDetails = await this._adminService.fetchKycData(trainerId);
       console.log("response check",trainerKycDetails)
       return res.json({ kycData: trainerKycDetails });
 
 
     } catch (error) {
       console.log("error in controller",error)
-      
+      next(error)
+
     }
 
   }
   async getAllTrainersKycDatas(req: Request, res: Response, next: NextFunction) {
     try {
 
-      const allTrainersKycData = await this.adminService.TraienrsKycData();
+      const allTrainersKycData = await this._adminService.TraienrsKycData();
       // console.log(allTrainersKycData);
 
       res.status(HTTP_statusCode.OK).json({ message: "Trainers KYC data fetched successfully", data: allTrainersKycData });
@@ -217,7 +223,7 @@ class AdminController {
       const trainer_id = req.params.trainer_id;
       const rejectionReason = req.body.rejectionReason || null;
 
-      await this.adminService.updateKycStatus(status, trainer_id, rejectionReason);
+      await this._adminService.updateKycStatus(status, trainer_id, rejectionReason);
 
       res.status(HTTP_statusCode.OK).json({ message: 'Trainer status updated successfully', status });
     } catch (error) {

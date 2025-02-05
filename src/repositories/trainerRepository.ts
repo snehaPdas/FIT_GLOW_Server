@@ -12,19 +12,25 @@ import { IBooking } from "../interface/common";
 import moment from "moment";
 import { ITrainerRepository } from "../interface/trainer/Trainer.repository.interface";
 import UserModel from "../models/userModel";
+import BaseRepository from "./base/baseRepository";
 
-class TrainerRepository implements  ITrainerRepository{
+class TrainerRepository extends BaseRepository<any> implements  ITrainerRepository{
   
-  private specializationModel = SpecializationModel;
-  private trainerModel = TrainerModel;
-  private otpModel = OtpModel;
-  private kycModel = KYCModel;
-  private sessionModel=SessionModel
-  private bookingModel=BookingModel
+  private _specializationModel = SpecializationModel;
+  private _trainerModel = TrainerModel;
+  private _otpModel = OtpModel;
+  private _kycModel = KYCModel;
+  private _sessionModel=SessionModel
+  private _bookingModel=BookingModel
+
+  constructor() {
+    super(TrainerModel);  
+  }
+
 
   async existingUser(email: string): Promise<Interface_Trainer | null> {
     try {
-      return await this.trainerModel.findOne({ email });
+      return await this._trainerModel.findOne({ email });
     } catch (error) {
       throw error;
     }
@@ -33,7 +39,7 @@ class TrainerRepository implements  ITrainerRepository{
 
   async findAllSpecializations() {
     try {
-      return await this.specializationModel.find({});
+      return await this._specializationModel.find({});
     } catch (error) {
       console.error("Error fetching specializations:", error);
       throw error;
@@ -44,7 +50,7 @@ class TrainerRepository implements  ITrainerRepository{
     try {
       let email = trainerData.email;
   
-      return await this.trainerModel.findOne({ email });
+      return await this._trainerModel.findOne({ email });
     } catch (error) {
       console.log("error ", error);
       throw error;
@@ -53,7 +59,7 @@ class TrainerRepository implements  ITrainerRepository{
 
   async saveOtp(email: string, OTP: string, OTPExpirey: Date) {
     try {
-      const saveotp = await new this.otpModel({
+      const saveotp = await new this._otpModel({
         email,
         otp: OTP,
         expiresAt: OTPExpirey,
@@ -67,7 +73,7 @@ class TrainerRepository implements  ITrainerRepository{
   async getOtpByEmail(email: string): Promise<IOtp[] | []> {
     //////////OTPfetch
     try {
-      return await this.otpModel.find({ email });
+      return await this._otpModel.find({ email });
     } catch (error) {
       console.error("error in otp getting:", error);
       throw error;
@@ -98,7 +104,7 @@ class TrainerRepository implements  ITrainerRepository{
     }
 
       
-    const trainer = new this.trainerModel({
+    const trainer = new this._trainerModel({
       ...trainerData,
       specializations: specializationIds, 
     });
@@ -113,7 +119,7 @@ class TrainerRepository implements  ITrainerRepository{
 
   async saveOTP(email: string, OTP: string, OTPExpiry: Date): Promise<void> {
     try {
-      const newOtp = new this.otpModel({
+      const newOtp = new this._otpModel({
         email,
         otp: OTP,
         expiresAt: OTPExpiry,
@@ -135,7 +141,7 @@ class TrainerRepository implements  ITrainerRepository{
       }
 
       // Find OTP by ID and delete
-      await this.otpModel.findByIdAndDelete(otpId.toString());
+      await this._otpModel.findByIdAndDelete(otpId.toString());
       console.log(`OTP with ID ${otpId} deleted successfully.`);
     } catch (error) {
       console.error("Error in deleting OTP:", error);
@@ -145,7 +151,7 @@ class TrainerRepository implements  ITrainerRepository{
 
   async findTrainer(email: string): Promise<Interface_Trainer | null> {
     try {
-      return await this.trainerModel.findOne({ email });
+      return await this._trainerModel.findOne({ email });
     } catch (error) {
       console.log("error finding user login:", error);
       return null;
@@ -154,7 +160,7 @@ class TrainerRepository implements  ITrainerRepository{
 
   async findUserEmail(email: string) {
     try {
-      return await this.trainerModel.findOne({ email });
+      return await this._trainerModel.findOne({ email });
     } catch (error) {
       console.log("error finding user login:", error);
       return null;
@@ -165,11 +171,11 @@ class TrainerRepository implements  ITrainerRepository{
   
     console.log("reset reached in repos", hashedPassword);
     try {
-      const user = await this.trainerModel.findOne({ email });
+      const user = await this._trainerModel.findOne({ email });
       if (!user) {
         console.log("User Not found  for this email", email);
       }
-      const result = await this.trainerModel.updateOne(
+      const result = await this._trainerModel.updateOne(
         { email },
         { $set: { password: hashedPassword } }
       );
@@ -190,7 +196,7 @@ class TrainerRepository implements  ITrainerRepository{
 
   
     try {
-      let trainer = await this.trainerModel.findOne({ _id: formData.trainer_id }).select('specializations');
+      let trainer = await this._trainerModel.findOne({ _id: formData.trainer_id }).select('specializations');
       if (!trainer) {
           throw new Error("Trainer not found for the given trainer ID");
       }
@@ -209,7 +215,7 @@ class TrainerRepository implements  ITrainerRepository{
       };
         
 
-      const savedKyc = await this.kycModel.create(kycData);
+      const savedKyc = await this._kycModel.create(kycData);
       console.log("KYC Data saved successfully:", savedKyc);
       return savedKyc;
     } catch (error) {
@@ -222,7 +228,7 @@ class TrainerRepository implements  ITrainerRepository{
   async getTrainerStatus(trainerId: string) {
     console.log("get repository to getstatus><><><>,",trainerId)
     try {
-      const trainer = await this.trainerModel.findById(trainerId).select("kycStatus")
+      const trainer = await this._trainerModel.findById(trainerId).select("kycStatus")
       console.log(",,,,,,,,,,,,,,,,,,",trainer)
       
 
@@ -245,7 +251,7 @@ class TrainerRepository implements  ITrainerRepository{
   async changeKycStatus(trainerId: string, profileImage: string | undefined): Promise<string | undefined> {
     try {
       // Update the trainers profile image and KYC status
-      const trainerUpdate = await this.trainerModel.findByIdAndUpdate(
+      const trainerUpdate = await this._trainerModel.findByIdAndUpdate(
         trainerId,
         {
           kycStatus: "submitted",
@@ -259,7 +265,7 @@ class TrainerRepository implements  ITrainerRepository{
       }
   
 
-      await this.kycModel.findOneAndUpdate(
+      await this._kycModel.findOneAndUpdate(
         { trainerId: trainerId },
         { kycStatus: "submitted" },
         { new: true, runValidators: true }
@@ -277,7 +283,7 @@ class TrainerRepository implements  ITrainerRepository{
         console.log("trainer id is not found")
         return
       }
-      const specialisations=await this.trainerModel.findById(trainerid).populate("specializations")
+      const specialisations=await this._trainerModel.findById(trainerid).populate("specializations")
       console.log("specialisation sare....",specialisations?.specializations)
       return specialisations
     } catch (error) {
@@ -288,13 +294,13 @@ class TrainerRepository implements  ITrainerRepository{
   async createNewSession(sessiondata: ISession) {
     try {
       // Find trainer
-      const findTrainer = await this.trainerModel.findById(sessiondata.trainerId);
+      const findTrainer = await this._trainerModel.findById(sessiondata.trainerId);
       if (!findTrainer) {
         throw new Error("Trainer is not found");
       }
   
       // Fetch existing sessions for the same trainer
-      const existingSessions = await this.sessionModel.find({
+      const existingSessions = await this._sessionModel.find({
         trainerId: sessiondata.trainerId,
         startDate: sessiondata.startDate,
         $or: [
@@ -325,7 +331,7 @@ class TrainerRepository implements  ITrainerRepository{
       });
   
       if (hasConflict) {
-        console.log("........................")
+        
         throw new Error("Time conflict with an existing session.");
       }
   
@@ -333,7 +339,7 @@ class TrainerRepository implements  ITrainerRepository{
       sessiondata.price = Number(sessiondata.price);
   
       // Create the session
-      const createdSessionData = await this.sessionModel.create(sessiondata);
+      const createdSessionData = await this._sessionModel.create(sessiondata);
       return createdSessionData.populate("specializationId");
   
     } catch (error) {
@@ -344,7 +350,7 @@ class TrainerRepository implements  ITrainerRepository{
   
   async fetchSessionData(trainer_id: string) {
     try {
-      const sesseionData = await this.sessionModel
+      const sesseionData = await this._sessionModel
         .find({
           trainerId: trainer_id,
         })
@@ -361,7 +367,7 @@ class TrainerRepository implements  ITrainerRepository{
 try {
   console.log("booking details repository",trainerId)
   
-  const bookingDetails=await  this.bookingModel.find({trainerId}).populate("userId","name").exec()
+  const bookingDetails=await  this._bookingModel.find({trainerId}).populate("userId","name").exec()
   //.populate({path:"userId",select:"name email",}).exec();
   const response = bookingDetails.map((booking: any) => {
     return {
@@ -388,7 +394,7 @@ try {
         
       }
       console.log("sessiondata is got in repo",sessionData)
-      const updateSession=await this.sessionModel.findByIdAndUpdate(sessionId,data,{new:true})
+      const updateSession=await this._sessionModel.findByIdAndUpdate(sessionId,data,{new:true})
       console.log("updated session is",updateSession)
       return updateSession
     } catch (error) {
@@ -399,7 +405,7 @@ try {
   
   async fetchTrainer(trainer_id: string) {
     try {
-      const trainerData = await this.trainerModel.aggregate([
+      const trainerData = await this._trainerModel.aggregate([
         {
           $match: { _id: new mongoose.Types.ObjectId(trainer_id) },
         },
@@ -420,6 +426,7 @@ try {
     }
   }
   async fetchUeserDetails(userId: string) {
+    // eslint-disable-next-line no-useless-catch
     try {
       const userData = await UserModel.findById(userId);
       return userData;

@@ -26,8 +26,8 @@ const uploadTrainerDataFiles = upload.fields([
   ]);
 
 
-router.post('/signup', trainerControllerInstance.registerTrainer.bind(trainerControllerInstance))
-router.get('/specializations', trainerControllerInstance.getAllSpecializations.bind(trainerControllerInstance));
+router.post('/signup',trainerControllerInstance.registerTrainer.bind(trainerControllerInstance))
+router.get('/specializations', authMiddlewares(['trainer']),trainerControllerInstance.getAllSpecializations.bind(trainerControllerInstance));
 router.post("/otp",trainerControllerInstance.verifyOtp.bind(trainerControllerInstance))
 router.post('/resend-otp', trainerControllerInstance.resendOtp.bind(trainerControllerInstance))
 router.post("/logintrainer",trainerControllerInstance.loginTrainer.bind(trainerControllerInstance))
@@ -35,17 +35,17 @@ router.post("/refresh-token",trainerControllerInstance.refreshToken.bind(trainer
 router.post("/forgotpassword",trainerControllerInstance.forgotpassword.bind(trainerControllerInstance))
 router.post("/forgototp",trainerControllerInstance.verifyForgotOtp.bind(trainerControllerInstance))
 router.post("/resetpassword",trainerControllerInstance.resetPassword.bind(trainerControllerInstance))
-router.post("/trainers/kyc",uploadTrainerDataFiles,trainerControllerInstance.kycSubmission.bind(trainerControllerInstance))
-router.get('/kycStatus/:trainerId', trainerControllerInstance.trainerKycStatus.bind(trainerControllerInstance));
-router.get("/specializations/:trainerId",trainerControllerInstance.getSpecialization.bind(trainerControllerInstance))
+router.post("/trainers/kyc",authMiddlewares(['trainer']),uploadTrainerDataFiles,trainerControllerInstance.kycSubmission.bind(trainerControllerInstance))
+router.get('/kycStatus/:trainerId',authMiddlewares(['trainer']), trainerControllerInstance.trainerKycStatus.bind(trainerControllerInstance));
+router.get("/specializations/:trainerId",authMiddlewares(['trainer']),trainerControllerInstance.getSpecialization.bind(trainerControllerInstance))
 
-router.post('/session/:trainerId', trainerControllerInstance.storeSessionData.bind(trainerControllerInstance))
-router.put('/edit-session/:sessionId', trainerControllerInstance.editStoreSessionData.bind(trainerControllerInstance))
+router.post('/session/:trainerId',authMiddlewares(['trainer']),trainerControllerInstance.storeSessionData.bind(trainerControllerInstance))
+router.put('/edit-session/:sessionId',authMiddlewares(['trainer']), trainerControllerInstance.editStoreSessionData.bind(trainerControllerInstance))
 
-router.get('/shedules/:trainerId', trainerControllerInstance.getSessionSchedules.bind(trainerControllerInstance))
-router.get(`/bookingdetails/:trainerId`,trainerControllerInstance.fetchbookingDetails.bind(trainerControllerInstance))
-router.get('/:trainerId',  trainerControllerInstance.getTrainer.bind(trainerControllerInstance))
-router.get('/users/:userId',  trainerControllerInstance.fetchUser.bind(trainerControllerInstance))
+router.get('/shedules/:trainerId',authMiddlewares(['trainer']), trainerControllerInstance.getSessionSchedules.bind(trainerControllerInstance))
+router.get(`/bookingdetails/:trainerId`,authMiddlewares(['trainer']),trainerControllerInstance.fetchbookingDetails.bind(trainerControllerInstance))
+router.get('/:trainerId', authMiddlewares(['trainer']),trainerControllerInstance.getTrainer.bind(trainerControllerInstance))
+router.get('/users/:userId', authMiddlewares(['trainer']),trainerControllerInstance.fetchUser.bind(trainerControllerInstance))
 
 
 

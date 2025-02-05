@@ -7,12 +7,14 @@ export interface CustomRequest extends Request{
 }
 
 const authMiddleware=(roles:string[]=[])=>{
-    console.log("in nauth middleware.......")
+    console.log("in n auth middleware.......")
+    
 
     
     return async ( req:CustomRequest,res:Response,next:NextFunction)=>{
-        
+            console.log("////////////")
         const token=req.header("Authorization")?.split(" ")[1]
+        console.log("token checkinhhhh",token)
         if(!token){
             res.status(401).json({message:"Access Denied,token Missing"})
 

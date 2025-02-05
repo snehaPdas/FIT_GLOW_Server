@@ -7,7 +7,7 @@ const router = express.Router()
 const messageController = new MessageController() 
 
 
-router.post('/send',  messageController.sendMessage)
+router.post('/send',  messageController._sendMessage)
 router.get('/:token/:id', messageController.getMessage)
 
 

@@ -11,9 +11,9 @@ import {CustomRequest} from "../middlewares/authmiddlewares"
 
 
 class UserController {
-  private userService: IUserService;
+  private _userService: IUserService;
   constructor(userServiceInstance: UserService) {
-    this.userService = userServiceInstance;
+    this._userService = userServiceInstance;
   }
 
   async register(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -23,7 +23,7 @@ class UserController {
       const userData: IUser = req.body;
       
          
-      await this.userService.register(userData);
+      await this._userService.register(userData);
       res.status(HTTP_statusCode.OK).json({ message: "Registration successful" });
     } catch (error:any) {
       console.error("error in register controller",error.message)
@@ -52,7 +52,7 @@ class UserController {
        console.log("verify otp controller");
       const { userData, otp } = req.body;
       
-      await this.userService.verifyOTP(userData, otp);
+      await this._userService.verifyOTP(userData, otp);
 
       res
         .status(HTTP_statusCode.OK)
@@ -77,7 +77,7 @@ class UserController {
        console.log("verify otp controller");
       const { userData, otp } = req.body;
       
-      await this.userService.verifyForgotOTP(userData, otp);
+      await this._userService.verifyForgotOTP(userData, otp);
 
       res
         .status(HTTP_statusCode.OK)
@@ -99,7 +99,7 @@ class UserController {
   async resendOtp(req:Request,res:Response,next:NextFunction){
     try {
       const {useremail}=req.body
-      await this.userService.ResendOtp(useremail)
+      await this._userService.ResendOtp(useremail)
     } catch (error) { 
       console.log("error in resend otp",error)
     }
@@ -108,7 +108,7 @@ class UserController {
 async loginUser(req:Request,res:Response,next:NextFunction){
   try {
     const {email,password}=req.body
-   let user=await this.userService.LoginUser(email,password)
+   let user=await this._userService.LoginUser(email,password)
 
    if(user){
     const {accessToken,refreshToken}=user
@@ -155,7 +155,7 @@ if(!refresh_token){
   return 
 }
 try {
-  const newAccessToken=await this.userService.generateNewAccessToken(refresh_token)
+  const newAccessToken=await this._userService.generateNewAccessToken(refresh_token)
   const UserNewAccessToken=Object.assign({},{accessToken:newAccessToken})
   res.status(HTTP_statusCode.OK).json({accessToken:UserNewAccessToken})
 
@@ -172,7 +172,7 @@ try {
 
   console.log("token is &&&&&",token)
   const decodedToken:JwtPayload=jwtDecode(token)
-  const response=await this.userService.googleSignUpUser(decodedToken)
+  const response=await this._userService.googleSignUpUser(decodedToken)
    res.status(HTTP_statusCode.OK).json({message:"user signed successfully"})
    return 
 } catch (error) {
@@ -185,7 +185,7 @@ async forgotpassword(req:Request,res:Response,next:NextFunction):Promise<any>{
   try {
     const {emailData}=req.body
     console.log("got email from body",emailData)
-    const response=await this.userService.forgotpassword(emailData)
+    const response=await this._userService.forgotpassword(emailData)
     console.log("noll",response)
     if(!response){
       return res.status(HTTP_statusCode.BadRequest).json({message:"email not found"})
@@ -201,7 +201,7 @@ async resetPassword(req:Request,res:Response,next:NextFunction):Promise<any>{
   try {
      const{userData,payload}=req.body
     
-     const result=await this.userService.resetapassword(userData,payload)
+     const result=await this._userService.resetapassword(userData,payload)
      console.log("what is the response got?",result)
      if(result?.modifiedCount===1){
       return res.status(HTTP_statusCode.OK).json({ message: "Password reset successfully" });
@@ -221,7 +221,7 @@ async resetPassword(req:Request,res:Response,next:NextFunction):Promise<any>{
 async getAllTrainers(req:Request,res:Response,next:NextFunction){
   console.log("ïn controller")
   try {
-    const allTrainers=await this.userService.getAllTrainers()
+    const allTrainers=await this._userService.getAllTrainers()
     
     res.status(HTTP_statusCode.OK).json(allTrainers)
     
@@ -234,7 +234,7 @@ async getAllTrainers(req:Request,res:Response,next:NextFunction){
 
 async getSessionSchedules(req: Request, res: Response, next: NextFunction) {
   try {
-    const sessionSchedules = await this.userService.getSessionSchedules();
+    const sessionSchedules = await this._userService.getSessionSchedules();
     res.status(HTTP_statusCode.OK).json(sessionSchedules);
   } catch (error) {
     next(error)
@@ -251,7 +251,7 @@ async getTrainer(req: Request, res: Response, next: NextFunction) {
       res.status(HTTP_statusCode.BadRequest).json({ message: "Trainer ID is required" });
     }
 
-    const trainer = await this.userService.getTrainer(trainerId);
+    const trainer = await this._userService.getTrainer(trainerId);
     // console.log(trainer);
 
     if (!trainer) {
@@ -269,8 +269,8 @@ async checkoutPayment(req: Request, res: Response, next: NextFunction){
     const userId=req.body.userData
     const sessionID=req.params.sessionId
     console.log("session id",sessionID,"user is",userId)
-    const paymentResponse=await this.userService.checkoutPayment( sessionID,userId)
-    console.log("iiiiiiiiiiii bpaymentResponse",paymentResponse)
+    const paymentResponse=await this._userService.checkoutPayment( sessionID,userId)
+    
     res.status(HTTP_statusCode.OK).json({ id: paymentResponse?.id });
   } catch (error) {
     console.log("error while payment in controller",error)
@@ -283,7 +283,7 @@ async createBooking(req: Request, res: Response, next: NextFunction){
    
     const { sessionId, userId , stripe_session_id} = req.body;
     
-    const bookingDetails = await this.userService.findBookingDetails(
+    const bookingDetails = await this._userService.findBookingDetails(
       sessionId,
       userId,
       stripe_session_id
@@ -297,7 +297,7 @@ async createBooking(req: Request, res: Response, next: NextFunction){
 async fetchAllSpecializations(req: Request, res: Response, next: NextFunction){
 
   try {
-    const response=await this.userService.fetchSpecialization()
+    const response=await this._userService.fetchSpecialization()
     
     res.status(HTTP_statusCode.OK).json(response)
   } catch (error) {
@@ -307,7 +307,7 @@ async fetchAllSpecializations(req: Request, res: Response, next: NextFunction){
 async getUser(req: Request, res: Response, next: NextFunction){
   try {
     const userId=req.params.userId
-   const response= await this.userService.fechtUserData(userId)
+   const response= await this._userService.fechtUserData(userId)
     res.status(HTTP_statusCode.OK).json({data:response})
   } catch (error) {
     
@@ -318,7 +318,7 @@ async editUserData(req: Request, res: Response, next: NextFunction){
 try {
   const userData=req.body
   const userId = req.body._id;
-  const response=await this.userService.editUserData(userId,userData)
+  const response=await this._userService.editUserData(userId,userData)
   res.status(HTTP_statusCode.OK).json(response)
 } catch (error) {
   console.log("Error in edit userData",error)
@@ -331,11 +331,13 @@ async getBookedsessionData(req: CustomRequest, res: Response, next: NextFunction
     //const userId=req.params.userId
    const userId=req.authData?.id
     console.log("user id issssssss",userId)
-    const response=await this.userService.getBookedsessionData(userId)
+    const response=await this._userService.getBookedsessionData(userId)
     
     res.status(HTTP_statusCode.OK).json({data:response})
   } catch (error) {
     console.log("Error while fetching booking details in controller",error)
+    next(error)
+
   }
 }
 

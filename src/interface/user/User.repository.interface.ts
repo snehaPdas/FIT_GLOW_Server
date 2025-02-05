@@ -4,6 +4,8 @@ import { IOtp } from "../common"
 import { IBooking } from "../common";
 import mongoose, { Types } from "mongoose";
 import { User } from "../../interface/user_interface";
+import { Interface_Trainer, ISpecialization } from "../trainer_interface";
+import { ISession } from "../trainer_interface";
 
 
 export interface IUserRepository{
@@ -22,7 +24,7 @@ export interface IUserRepository{
     getTrainer(trainerId:string):Promise<any>
     findSessionDetails(sessionID:string):Promise<any>
     findExistingBooking(bookingDetails:IBooking):Promise<any>
-    createBooking(bookingDetails:IBooking):Promise<any>
+    createBooking(bookingDetails:IBooking):Promise<IBooking>
     fetchSpecializations():Promise<any>
     fetchUserData(userId:string):Promise<User|null>
     editUserData(userId:string,userData:User):Promise<any>

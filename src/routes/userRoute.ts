@@ -24,16 +24,16 @@ const userControllerInstance = new UserController(userServiceInstance);
  router.post("/forgotpassword",userControllerInstance.forgotpassword.bind(userControllerInstance))
  router.post("/resetpassword",userControllerInstance.resetPassword.bind(userControllerInstance))
 
- router.get("/trainers",isblocked,userControllerInstance.getAllTrainers.bind(userControllerInstance))
- router.get("/schedules",isblocked,userControllerInstance.getSessionSchedules.bind(userControllerInstance))
- router.get("/trainers/:trainerId", userControllerInstance.getTrainer.bind(userControllerInstance))
+ router.get("/trainers",isblocked,authMiddlewares(['user']),userControllerInstance.getAllTrainers.bind(userControllerInstance))
+ router.get("/schedules",isblocked,authMiddlewares(['user']),userControllerInstance.getSessionSchedules.bind(userControllerInstance))
+ router.get("/trainers/:trainerId", authMiddlewares(['user']),userControllerInstance.getTrainer.bind(userControllerInstance))
  router.post("/payment/:sessionId",isblocked, authMiddlewares(['user']), userControllerInstance.checkoutPayment.bind(userControllerInstance))
  
- router.post("/bookings",userControllerInstance.createBooking.bind(userControllerInstance))
- router.get("/specializations",userControllerInstance.fetchAllSpecializations.bind(userControllerInstance))
- router.get('/users/:userId',userControllerInstance.getUser.bind(userControllerInstance))
- router.patch("/users",userControllerInstance.editUserData.bind(userControllerInstance))
- router.get("/booking-details",authMiddlewares(['user']),userControllerInstance.getBookedsessionData.bind(userControllerInstance))
+ router.post("/bookings",authMiddlewares(['user']),userControllerInstance.createBooking.bind(userControllerInstance))
+ router.get("/specializations",authMiddlewares(['user']),userControllerInstance.fetchAllSpecializations.bind(userControllerInstance))
+ router.get('/users/:userId',authMiddlewares(['user']),userControllerInstance.getUser.bind(userControllerInstance))
+ router.patch("/users",authMiddlewares(['user']),userControllerInstance.editUserData.bind(userControllerInstance))
+ router.get("/booking-details",authMiddlewares(['user']),authMiddlewares(['user']),userControllerInstance.getBookedsessionData.bind(userControllerInstance))
 
 
 

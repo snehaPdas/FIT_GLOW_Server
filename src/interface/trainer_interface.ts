@@ -1,6 +1,9 @@
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     import mongoose, { Types } from "mongoose";
 
     export interface Interface_Trainer{
+        length: number;
+        filter(arg0: (trainer: { isBlocked: boolean; kycStatus: string; }) => boolean): unknown;
         _id?: Types.ObjectId;
         id?: string; 
         name: string;
@@ -9,8 +12,8 @@
         password: string;
         isBlocked?: boolean;
         specializations?: Types.ObjectId[];
-        kycStatus:String,
-        profileImage:String
+        kycStatus:string,
+        profileImage:string
 
 
     }
@@ -32,6 +35,8 @@
 
   
 export interface ISession {
+  _id: number;
+  save(): unknown;
   trainerId: Types.ObjectId;
   specializationId: Types.ObjectId;
   startDate: Date;

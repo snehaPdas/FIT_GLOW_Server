@@ -1,5 +1,5 @@
 // userService.ts
-import UserRepository from "../repositories/userRepository";
+// import UserRepository from "../repositories/userRepository";
 import sendMail from "../config/email_config";
 import { IBooking, IUser } from "../interface/common";
 import bcrypt from "bcrypt";
@@ -9,25 +9,25 @@ import { generateRefreshToken } from "../utils/jwtHelper";
 import { verifyRefreshToken } from "../utils/jwtHelper"
 import stripeClient from "../config/stripeClients";
 import mongoose from "mongoose";
-import stripe from "stripe";
+// import stripe from "stripe";
 import { IUserService } from "../interface/user/User.service.interface";
 import { IUserRepository } from "../interface/user/User.repository.interface";
 import {User} from "../interface/user_interface"
 
 class UserService implements IUserService {
-  private userRepository: IUserRepository;
-  private OTP: string | null = null;
-  private expiryOTP_time: Date | null = null;
+  private _userRepository: IUserRepository;
+  private _OTP: string | null = null;
+  private _expiryOTP_time: Date | null = null;
 
   constructor(userRepository: IUserRepository) {
-    this.userRepository = userRepository;
+    this._userRepository = userRepository;
   }
 
   // Register user and send OTP
   async register(userData: IUser): Promise<void> {
     console.log("in service")
     try {
-      const existedUser = await this.userRepository.existingUser(userData.email)
+      const existedUser = await this._userRepository.existingUser(userData.email)
       console.log("in service....",)
 
       if (existedUser) {
@@ -35,24 +35,24 @@ class UserService implements IUserService {
         throw new Error("Email Already Exists");
       }
       const generateOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      this.OTP = generateOtp;
-      console.log("Generated OTP is", this.OTP);
+      this._OTP = generateOtp;
+      console.log("Generated OTP is", this._OTP);
 
       //send otp to the email:
-      const isMailSet = await sendMail("otp", userData.email, this.OTP);
+      const isMailSet = await sendMail("otp", userData.email, this._OTP);
       if (!isMailSet) {
         throw new Error("Email not sent");
       }
 
       const OTP_createdTime = new Date();
-      this.expiryOTP_time = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
+      this._expiryOTP_time = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
       //store OTP IN db
-      await this.userRepository.saveOTP(
+      await this._userRepository.saveOTP(
         userData.email,
-        this.OTP,
-        this.expiryOTP_time
+        this._OTP,
+        this._expiryOTP_time
       );
-      console.log(`OTP will expire at: ${this.expiryOTP_time}`);
+      console.log(`OTP will expire at: ${this._expiryOTP_time}`);
     } catch (error) {
       console.error("error in service:", (error as Error).message);
       throw error;
@@ -62,7 +62,7 @@ class UserService implements IUserService {
   // Verify OTP
   async verifyOTP(userData: IUser, otp: string): Promise<void> {
   try {
-      const validateOtp = await this.userRepository.getOtpByEmail(
+      const validateOtp = await this._userRepository.getOtpByEmail(
         userData.email
       );
       console.log("the total otp in mail validateOtp is.....", validateOtp);
@@ -93,12 +93,12 @@ class UserService implements IUserService {
 
           const hashedPassword = await bcrypt.hash(userData.password, 10);
           const newUserData = { ...userData, password: hashedPassword };
-          await this.userRepository.createNewUser(newUserData);
+          await this._userRepository.createNewUser(newUserData);
           console.log("User successfully stored.");
-          await this.userRepository.deleteOtpById(latestOtp._id);
+          await this._userRepository.deleteOtpById(latestOtp._id);
         } else {
           console.log("OTP has expired");
-          await this.userRepository.deleteOtpById(latestOtp._id);
+          await this._userRepository.deleteOtpById(latestOtp._id);
           throw new Error("OTP has expired");
         }
       } else {
@@ -115,7 +115,7 @@ class UserService implements IUserService {
 
   async verifyForgotOTP(userData: string, otp: string): Promise<void> {
     try {
-      const validateOtp = await this.userRepository.getOtpByEmail(userData);
+      const validateOtp = await this._userRepository.getOtpByEmail(userData);
       console.log("the validateOtp is..", validateOtp);
       if (validateOtp.length === 0) {
         console.log("there is no otp in email");
@@ -130,10 +130,10 @@ class UserService implements IUserService {
 
           console.log("OTP is valid and verified", latestOtp.expiresAt);
 
-          await this.userRepository.deleteOtpById(latestOtp._id);
+          await this._userRepository.deleteOtpById(latestOtp._id);
         } else {
           console.log("OTP has expired");
-          await this.userRepository.deleteOtpById(latestOtp._id);
+          await this._userRepository.deleteOtpById(latestOtp._id);
           throw new Error("OTP has expired");
         }
       } else {
@@ -153,16 +153,16 @@ class UserService implements IUserService {
       const generateOtp = Math.floor(1000 + Math.random() * 9000).toString();
       const OTP_createdTime = new Date();
       const expireyTime = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
-      await this.userRepository.saveOTP(useremail, generateOtp, expireyTime);
-      this.OTP=generateOtp
+      await this._userRepository.saveOTP(useremail, generateOtp, expireyTime);
+      this._OTP=generateOtp
       console.log("new generateOtp is:", generateOtp);
       
 
-      const isMailSent = await sendMail("otp", useremail, this.OTP);
+      const isMailSent = await sendMail("otp", useremail, this._OTP);
       if (!isMailSent) {
         throw new Error("Email not sent");
       }
-      console.log(`otp:::Resent OTP ${this.OTP} to ${useremail}`);
+      console.log(`otp:::Resent OTP ${this._OTP} to ${useremail}`);
      
     } catch (error) {
       console.error("Error in resend otp:", error);
@@ -171,7 +171,7 @@ class UserService implements IUserService {
 
   async LoginUser(email: string, password: string): Promise<any> {
     try {
-      const user: IUser | null = await this.userRepository.findUser(email);
+      const user: IUser | null = await this._userRepository.findUser(email);
       console.log("------>", user);
       if (!user) {
         console.log("User not found");
@@ -193,6 +193,7 @@ class UserService implements IUserService {
         email: user.email,
         role: "user",
       });
+      
 
       //Refresh Token Generate
       const refreshToken = generateRefreshToken({
@@ -245,11 +246,11 @@ class UserService implements IUserService {
   async googleSignUpUser(decodedToken: JwtPayload): Promise<any> {
     const email = decodedToken.email;
     const name = decodedToken.name;
-    let existedemail = await this.userRepository.existingUser(email);
+    const existedemail = await this._userRepository.existingUser(email);
     if (!existedemail) {
       try {
         const newUser = { email, name, password: null };
-        const createdUser = await this.userRepository.createUser(newUser);
+        const createdUser = await this._userRepository.createUser(newUser);
         return createdUser;
       } catch (error) {
         console.error("Error creating user:", error);
@@ -263,30 +264,30 @@ class UserService implements IUserService {
     try {
       console.log("checccc", UserEmail);
 
-      const userResponse = await this.userRepository.findUserEmail(UserEmail);
+      const userResponse = await this._userRepository.findUserEmail(UserEmail);
       if (!userResponse) {
         console.log("user not already exist", userResponse);
         throw new Error("Invalid email Address");
       }
       const generateOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      this.OTP = generateOtp;
-      console.log("Generated OTP is", this.OTP);
+      this._OTP = generateOtp;
+      console.log("Generated OTP is", this._OTP);
 
       //send otp to the email:
-      const isMailSet = await sendMail("otp", UserEmail, this.OTP);
+      const isMailSet = await sendMail("otp", UserEmail, this._OTP);
       if (!isMailSet) {
         throw new Error("Email not sent");
       }
 
       const OTP_createdTime = new Date();
-      this.expiryOTP_time = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
+      this._expiryOTP_time = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
       //store OTP IN db
-      await this.userRepository.saveOTP(
+      await this._userRepository.saveOTP(
         UserEmail,
-        this.OTP,
-        this.expiryOTP_time
+        this._OTP,
+        this._expiryOTP_time
       );
-      console.log(`OTP will expire at: ${this.expiryOTP_time}`);
+      console.log(`OTP will expire at: ${this._expiryOTP_time}`);
 
       return userResponse;
     } catch (error) {
@@ -300,20 +301,22 @@ class UserService implements IUserService {
       const { newPassword }: { newPassword: string } = payload;
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       console.log("hashed", hashedPassword);
-      const response = await this.userRepository.saveResetPassword(
+      const response = await this._userRepository.saveResetPassword(
         userData,
         hashedPassword
       );
       console.log("response check in userservice ", response);
       return response;
-    } catch (error) {}
+    } catch (error) {
+      console.log("Error is",error)
+    }
   }
 
   async getAllTrainers(){
     
     console.log("ïn service")
     try {
-      const trainers=await this.userRepository.getAllTrainers()
+      const trainers=await this._userRepository.getAllTrainers()
       const validTrainers=trainers?.filter((trainer: { isBlocked: boolean; kycStatus: string; })=>trainer.isBlocked===false && trainer.kycStatus==="approved")||[]
       
       return validTrainers
@@ -326,19 +329,23 @@ class UserService implements IUserService {
   }
   async getSessionSchedules() {
     try {
-      return await this.userRepository.fetchAllSessionSchedules();
-    } catch (error) {}
+      return await this._userRepository.fetchAllSessionSchedules();
+    } catch (error) {
+      console.log("Error is",error)
+    }
   }
   async getTrainer(trainerId: string) {
     try {
-      return await this.userRepository.getTrainer(trainerId);
-    } catch (error) {}
+      return await this._userRepository.getTrainer(trainerId);
+    } catch (error) {
+      console.log("error is",error)
+    }
   }
 
   async checkoutPayment(sessionID:string,userId:string) {
 try {
  
-  const sessionData = await this.userRepository.findSessionDetails(sessionID);
+  const sessionData = await this._userRepository.findSessionDetails(sessionID);
 
   console.log("sessionData is......",sessionData)
   if (!sessionData || typeof sessionData.price !== "number" ||  !(sessionData.selectedDate || sessionData.startDate) ) {
@@ -387,7 +394,7 @@ try {
 
   async findBookingDetails(session_id: string, user_id: string, stripe_session_id: string) {
     try {
-      const session = await this.userRepository.findSessionDetails(session_id);
+      const session = await this._userRepository.findSessionDetails(session_id);
 
       if (session) {
         session.status = "Confirmed";
@@ -422,12 +429,12 @@ try {
         updatedAt: new Date(),
         payment_intent: sessionData.payment_intent ? sessionData.payment_intent.toString() : undefined
       };
-      const existingBooking = await this.userRepository.findExistingBooking(bookingDetails);
+      const existingBooking = await this._userRepository.findExistingBooking(bookingDetails);
       if (existingBooking) {
         console.log("Booking already exists.");
         throw new Error("Booking already exists.");
       }
-      const bookingData=await this.userRepository.createBooking(bookingDetails)
+      const bookingData=await this._userRepository.createBooking(bookingDetails)
       
     } catch (error) {
       console.log("error in fetching userservice",error)
@@ -437,7 +444,7 @@ try {
   async fetchSpecialization(){
     
     try {
-      const response=this.userRepository.fetchSpecializations()
+      const response=this._userRepository.fetchSpecializations()
       return response
     } catch (error) {
       console.log("Error in fetchingspecializations userservice",error)
@@ -445,7 +452,7 @@ try {
   }
   async fechtUserData(userId:string):Promise<User|null>{
     try {
-     return  await this.userRepository.fetchUserData(userId) 
+     return  await this._userRepository.fetchUserData(userId) 
     } catch (error) {
       console.log("Error in fetch Data",error)
       return null
@@ -454,7 +461,7 @@ try {
 
   async editUserData(userId:string,userData:User){
     try {
-     return  await this.userRepository.editUserData(userId,userData)
+     return  await this._userRepository.editUserData(userId,userData)
     } catch (error) {
       console.log("Error in EditUserData in Service",error)
       
@@ -462,7 +469,7 @@ try {
   }
   async getBookedsessionData(userId:string){
     try {
-     return  await this.userRepository.getBookedsessionData(userId)
+     return  await this._userRepository.getBookedsessionData(userId)
     } catch (error) {
       console.log("Error in fetching user data session ",error)
     }

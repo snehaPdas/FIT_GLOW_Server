@@ -10,7 +10,7 @@ import TrainerModel from "../models/trainerModel";
 
 
 class MessageController {
-  async sendMessage(req: Request, res: Response) {
+  async _sendMessage(req: Request, res: Response) {
     try {
       const { token, receiverId, message } = req.body;
  console.log('server', token,'---------', receiverId,"message iss",message);

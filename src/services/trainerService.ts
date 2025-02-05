@@ -11,16 +11,16 @@ import { ITrainerRepository } from "../interface/trainer/Trainer.repository.inte
 
 
 class TrainerService implements ITrainerService {
-    private trainerRepository: ITrainerRepository;
-    private OTP: string | null = null;
-    private expiryOTP_time:Date | null=null
+    private _trainerRepository: ITrainerRepository;
+    private _OTP: string | null = null;
+    private _expiryOTP_time:Date | null=null
 
     constructor(trainerRepository: ITrainerRepository) {
-        this.trainerRepository = trainerRepository;
+        this._trainerRepository = trainerRepository;
       }
       async findAllSpecializations() {
         try {
-        const  response=await this.trainerRepository.findAllSpecializations();
+        const  response=await this._trainerRepository.findAllSpecializations();
         console.log("response gotttt",response)
         return response
         } catch (error) {
@@ -32,20 +32,20 @@ class TrainerService implements ITrainerService {
         console.log("trainer data is",trainerData)
         try {
 
-          const existingTrainer = await this.trainerRepository.existsTrainer(trainerData);
+          const existingTrainer = await this._trainerRepository.existsTrainer(trainerData);
           console.log("existingTrainer",existingTrainer)
           if(existingTrainer){
             throw new Error("Email already exist")
           }
           const generateOtp=Math.floor(1000+ Math.random()*9000).toString()
-           this.OTP=generateOtp
-           console.log("the otp is:...",this.OTP)
-           const email_Ht=otpEmailTemplate(this.OTP,trainerData.name||"user")
+           this._OTP=generateOtp
+           console.log("the otp is:...",this._OTP)
+           const email_Ht=otpEmailTemplate(this._OTP,trainerData.name||"user")
            const sentEmail=await sendMail(" your otp for Registration is: ",trainerData.email,email_Ht)
            if(!sentEmail){throw new Error("Email not sent")}
            const OTP_createdTime=new Date()
-           this.expiryOTP_time=new Date(OTP_createdTime.getTime()+1*60*1000)
-           await this.trainerRepository.saveOtp(trainerData.email,this.OTP,this.expiryOTP_time)
+           this._expiryOTP_time=new Date(OTP_createdTime.getTime()+1*60*1000)
+           await this._trainerRepository.saveOtp(trainerData.email,this._OTP,this._expiryOTP_time)
             
         } catch (error) {
           console.error("Error in service:", );
@@ -58,7 +58,7 @@ class TrainerService implements ITrainerService {
         
 
         try {
-          const validateOtp=await this.trainerRepository.getOtpByEmail(trainerData.email)
+          const validateOtp=await this._trainerRepository.getOtpByEmail(trainerData.email)
           console.log("the validateOtp is..",validateOtp)
           if(validateOtp.length===0){
             console.log("there is no otp in email")
@@ -80,12 +80,12 @@ class TrainerService implements ITrainerService {
                     const hashedPassword = await bcrypt.hash(trainerData.password, 10);
                     
                     const newUserData = { ...trainerData, password: hashedPassword };
-                    await this.trainerRepository.createNewUser(newUserData);
+                    await this._trainerRepository.createNewUser(newUserData);
                     console.log("User successfully stored.");
-                    await this.trainerRepository.deleteOtpById(latestOtp._id);
+                    await this._trainerRepository.deleteOtpById(latestOtp._id);
                   } else {
                     console.log("OTP has expired");
-                    await this.trainerRepository.deleteOtpById(latestOtp._id);
+                    await this._trainerRepository.deleteOtpById(latestOtp._id);
                     throw new Error("OTP has expired");
                   }
                 } else {
@@ -108,22 +108,22 @@ class TrainerService implements ITrainerService {
           const generatedOTP: string = Math.floor(
             1000 + Math.random() * 9000
           ).toString();
-          this.OTP = generatedOTP;
+          this._OTP = generatedOTP;
     
           const OTP_createdTime = new Date();
-          this.expiryOTP_time = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
+          this._expiryOTP_time = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
     
-          await this.trainerRepository.saveOTP(
+          await this._trainerRepository.saveOTP(
             email,
-            this.OTP,
-            this.expiryOTP_time
+            this._OTP,
+            this._expiryOTP_time
           );
     
-          const email_Ht=otpEmailTemplate(this.OTP,email||"user")
+          const email_Ht=otpEmailTemplate(this._OTP,email||"user")
            const sentEmail=await sendMail(" your otp for Registration is: ",email,email_Ht)
            if(!sentEmail){throw new Error("Email not sent")}
     
-          console.log(`Resent OTP ${this.OTP} to ${email}`);
+          console.log(`Resent OTP ${this._OTP} to ${email}`);
         } catch (error) {
           console.error("Error in resendOTP:", (error as Error).message);
           throw error;
@@ -133,7 +133,7 @@ class TrainerService implements ITrainerService {
       async verifyForgotOTP(userData: string, otp: string): Promise<void> {
       
         try {
-          const validateOtp = await this.trainerRepository.getOtpByEmail(userData);
+          const validateOtp = await this._trainerRepository.getOtpByEmail(userData);
           console.log("the validateOtp is..", validateOtp);
           if (validateOtp.length === 0) {
             console.log("there is no otp in email");
@@ -157,10 +157,10 @@ class TrainerService implements ITrainerService {
               console.log("OTP is valid and verified", latestOtp.expiresAt);
               
     
-              await this.trainerRepository.deleteOtpById(latestOtp._id);
+              await this._trainerRepository.deleteOtpById(latestOtp._id);
             } else {
               console.log("OTP has expired");
-              await this.trainerRepository.deleteOtpById(latestOtp._id);
+              await this._trainerRepository.deleteOtpById(latestOtp._id);
               throw new Error("OTP has expired");
             }
           } else {
@@ -178,7 +178,7 @@ class TrainerService implements ITrainerService {
       async LoginTrainer(email:string,password:string):Promise<any>{
         try{
           console.log("pppp")
-          const trainer:Interface_Trainer|null=await this.trainerRepository.findTrainer(email)
+          const trainer:Interface_Trainer|null=await this._trainerRepository.findTrainer(email)
       
           if (!trainer) {
             console.log("User not found")
@@ -190,7 +190,7 @@ class TrainerService implements ITrainerService {
             throw new Error("PasswordIncorrect")
           }
           //Access Token Generation
-         const accessToken=generateAccessToken({id:trainer._id?.toString() || "",email:trainer.email,role:"user"})
+         const accessToken=generateAccessToken({id:trainer._id?.toString() || "",email:trainer.email,role:"trainer"})
          
          
          //Refresh Token Generate
@@ -226,7 +226,7 @@ class TrainerService implements ITrainerService {
               email = payload?.email;
             }
             if (id && email) {
-              const role = 'user'
+              const role = 'trainer'
               const userNewAccessToken = generateAccessToken({ id, email,role });
               console.log("---->>>created new accessrtoken here check",userNewAccessToken)
               return userNewAccessToken;
@@ -246,30 +246,30 @@ class TrainerService implements ITrainerService {
         try {
           console.log("kkkk", UserEmail);
     
-          const userResponse = await this.trainerRepository.findUserEmail(UserEmail);
+          const userResponse = await this._trainerRepository.findUserEmail(UserEmail);
           if (!userResponse) {
             console.log("user not already exist", userResponse);
             throw new Error("Invalid email Address");
           }
           const generateOtp = Math.floor(1000 + Math.random() * 9000).toString();
-          this.OTP = generateOtp;
-          console.log("Trainer Generated OTP is", this.OTP);
+          this._OTP = generateOtp;
+          console.log("Trainer Generated OTP is", this._OTP);
     
           //send otp to the email:
-          const isMailSet = await sendMail("otp", UserEmail, this.OTP);
+          const isMailSet = await sendMail("otp", UserEmail, this._OTP);
           if (!isMailSet) {
             throw new Error("Email not sent");
           }
     
           const OTP_createdTime = new Date();
-          this.expiryOTP_time = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
+          this._expiryOTP_time = new Date(OTP_createdTime.getTime() + 1 * 60 * 1000);
           //store OTP IN db
-          await this.trainerRepository.saveOtp(
+          await this._trainerRepository.saveOtp(
             UserEmail,
-            this.OTP,
-            this.expiryOTP_time
+            this._OTP,
+            this._expiryOTP_time
           );
-          console.log(`OTP will expire at: ${this.expiryOTP_time}`);
+          console.log(`OTP will expire at: ${this._expiryOTP_time}`);
     
           return userResponse;
         } catch (error) {
@@ -283,7 +283,7 @@ class TrainerService implements ITrainerService {
             const { newPassword }: { newPassword: string } = payload;
             const hashedPassword = await bcrypt.hash(newPassword, 10);
             console.log("hashed", hashedPassword);
-            const response = await this.trainerRepository.saveResetPassword(
+            const response = await this._trainerRepository.saveResetPassword(
               userData,
               hashedPassword
             );
@@ -333,11 +333,11 @@ class TrainerService implements ITrainerService {
             }
         
             // Save KYC data in the repository
-             await this.trainerRepository.saveKyc(formData, documents);
+             await this._trainerRepository.saveKyc(formData, documents);
            
         
             // Change KYC status in the repository
-            return await this.trainerRepository.changeKycStatus(
+            return await this._trainerRepository.changeKycStatus(
               formData.trainer_id,
               documents.profileImageUrl
             );
@@ -353,7 +353,7 @@ class TrainerService implements ITrainerService {
           console.log("trainer id is",trainerId)
 
           try {
-            const kycStatus = await this.trainerRepository.getTrainerStatus(trainerId)
+            const kycStatus = await this._trainerRepository.getTrainerStatus(trainerId)
             return kycStatus;
           } catch (error) {
             console.error("Error in kycStatus service:", error);
@@ -364,7 +364,7 @@ class TrainerService implements ITrainerService {
      async getSpecialization(trainerId:string){
 
      try {
-        return await this.trainerRepository.getSpecialization(trainerId)
+        return await this._trainerRepository.getSpecialization(trainerId)
      } catch (error) {
       console.log("Error in service while specialization fetching",error)
      }
@@ -389,7 +389,7 @@ class TrainerService implements ITrainerService {
       if (duration < MINIMUM_SESSION_DURATION) {
         throw new Error("Session duration must be at least 30 minutes");
       }
-     return  await this.trainerRepository.createNewSession(sessiondata)
+     return  await this._trainerRepository.createNewSession(sessiondata)
 
       }catch(error:any){
         if (error.message.includes("Daily session limit")) {
@@ -410,7 +410,7 @@ class TrainerService implements ITrainerService {
      }
      async getSessionShedules(trainer_id: string) {
       try {
-        return await this.trainerRepository.fetchSessionData(trainer_id)
+        return await this._trainerRepository.fetchSessionData(trainer_id)
       } catch (error) {
         throw new Error("Error getting sessin shedule data");
       }
@@ -418,7 +418,7 @@ class TrainerService implements ITrainerService {
     async fetchBookingDetails(trainer_id:string){
       try {
         console.log("reached trainerbooking service")
-        const response=await this.trainerRepository.fecthBookingDetails(trainer_id)
+        const response=await this._trainerRepository.fecthBookingDetails(trainer_id)
         return response
       } catch (error) {
         console.log("Error fect booking details",error)
@@ -427,7 +427,7 @@ class TrainerService implements ITrainerService {
 
     async editStoreSessionData(sessionId:string,sessionData:string){
       try {
-        return await this.trainerRepository.editStoreSessionData(sessionId,sessionData)
+        return await this._trainerRepository.editStoreSessionData(sessionId,sessionData)
         
       } catch (error) {
         console.log("error in editStoreSessionData service",error)
@@ -436,14 +436,14 @@ class TrainerService implements ITrainerService {
     }
     async findTrainer(trainer_id: string) {
       try {
-        return await this.trainerRepository.fetchTrainer(trainer_id);
+        return await this._trainerRepository.fetchTrainer(trainer_id);
       } catch (error: any) {
         throw Error(error);
       }
     }
 
     async fetchUser(userId: string) {
-      return await this.trainerRepository.fetchUeserDetails(userId)
+      return await this._trainerRepository.fetchUeserDetails(userId)
     }
   
 

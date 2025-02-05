@@ -11,10 +11,11 @@ const server=http.createServer(app)
 
 const io=new Server(server,{
     cors:{
-    origin:process.env.CORS_ORIGIN,
-    credentials:true
+      origin: "http://localhost:5173", 
+      credentials:true
     }
 })
+console.log('io------------------',io);
 
 const userSocketMap: Record<string, string> = {}; 
 
@@ -26,6 +27,8 @@ export const getReceiverSocketId=(receiverId:string)=>{
 
 io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId as string; 
+    console.log('userIduserId',userId);
+    
 if (userId) {
  
     userSocketMap[userId] = socket.id; 
@@ -45,6 +48,26 @@ socket.on('sendMessage', (data) => {
       console.error("receiverId is missing in sendMessage data");
     }
   });
+
+  socket.on("outgoing-video-call", (data) => {
+    const userSocketId = getReceiverSocketId(data.to);
+    if (userSocketId) {
+      io.to(userSocketId).emit('incoming-video-call', {
+        _id: data.to,
+        from: data.from,
+        callType: data.callType,
+        trainerName: data.trainerName,
+        trainerImage: data.trainerImage,
+        roomId: data.roomId,
+      });
+    } else {
+      console.log(`Receiver not found for user ID: ${data.to}`);
+    }
+  });
+
+
+
+
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });
