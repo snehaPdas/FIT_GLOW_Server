@@ -21,7 +21,7 @@ const userSocketMap: Record<string, string> = {};
 
 
 export const getReceiverSocketId=(receiverId:string)=>{
-   
+   console.log("//////////////>>>>>>>>>",getReceiverSocketId)
     return userSocketMap[receiverId]
 }
 
@@ -65,7 +65,59 @@ socket.on('sendMessage', (data) => {
     }
   });
 
+  socket.on("accept-incoming-call",async(data)=>{
+    try {
+      const friendSocketId=await getReceiverSocketId(data.to)
+      console.log("**********",friendSocketId)
+      if(friendSocketId){
+        const startedAt = new Date();
+        const videoCall = {
+          trainerId: data.from,
+          userId: data.to,
+          roomId: data.roomId,
+          duration: 0, // Duration will be updated later
+          startedAt,
+          endedAt: null, // Not ended yet
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        // await chatService.createVideoCallHistory(videoCall);
+        socket.to(friendSocketId).emit("accepted-call", { ...data, startedAt });
 
+      }else {
+        console.error(`No socket ID found for the receiver with ID: ${data.to}`);
+      }
+    } catch (error:any) {
+      console.error("Error in accept-incoming-call handler:", error.message);
+
+    }
+  })
+  socket.on('trainer-call-accept',async (data) => {
+    const trainerSocket = await getReceiverSocketId(data.trainerId)
+    
+    if(trainerSocket) {
+
+      socket.to(trainerSocket).emit('trianer-accept', data)
+    }
+  })
+
+  socket.on('reject-call', (data) => {
+    const friendSocketId = getReceiverSocketId(data.to);
+    if (friendSocketId) {
+      
+      socket.to(friendSocketId).emit('call-rejected');
+    } else {
+      console.error(`No socket ID found for the receiver with ID: ${data.to}`);
+    }
+  });
+
+  socket.on("leave-room", (data) => {
+    const friendSocketId = getReceiverSocketId(data.to);
+    console.log('friendSocketId',friendSocketId, 'data', data.to);
+    if (friendSocketId) {
+      socket.to(friendSocketId).emit("user-left",data.to);
+    }
+  });
 
 
   socket.on("disconnect", () => {
