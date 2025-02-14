@@ -16,5 +16,6 @@ export interface IAdminService{
     fetchKycData(trainerId:string):Promise<IUser>
     TraienrsKycData():Promise<void>
     updateKycStatus(  status: string, trainer_id: string,rejectionReason: string | null):Promise<void>
+    getDashboardData():Promise<any>
 
 }

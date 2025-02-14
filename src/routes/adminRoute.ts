@@ -26,6 +26,7 @@ router.put("/specialization/:id",upload.single("image"),adminControllerInstance.
 router.get('/trainers/kyc',authMiddleware(['admin']), adminControllerInstance.getAllTrainersKycDatas.bind(adminControllerInstance))
 router.get('/trainers/kyc/:trainer_id',authMiddleware(['admin']), adminControllerInstance.trainersKycData.bind(adminControllerInstance));
 router.patch('/kyc-status-update/:trainer_id', authMiddleware(['admin']), adminControllerInstance.changeKycStatus.bind(adminControllerInstance));
+router.get('/dashboardData', authMiddleware(['admin']), adminControllerInstance.getDashboardData.bind(adminControllerInstance));
 
 
 export default router;

@@ -13,7 +13,9 @@ import BaseRepository from "./base/baseRepository";
 import { promises } from "dns";
 import { IUser } from "../interface/common";
 import { IKYC, ISpecialization, ITrainerKYC } from "../interface/trainer_interface";
+import BookingModel from "../models/bookingModel";
 type IUserDocument = IUser & Document;
+import { MonthlyStats } from "../interface/admin_interface";
 
 
 
@@ -27,6 +29,7 @@ class AdminRepository extends BaseRepository<any> implements IAdminRepository {
     private _kycModel = KYCModel
     private _trainerModel=TrainerModel
     private _kycRejectionReasonModel = KycRejectionReasonModel
+    private _bookingModel=BookingModel
 
     constructor() {
       super(AdminModel);  // Passing AdminModel to the base class for CRUD operations
@@ -219,7 +222,136 @@ async getAllTrainersKycDatas():Promise<any> {
       throw error;
     }
   }
+  async getAllStatistics(){
+    const totalTrainers=await this._trainerModel.countDocuments()
+    const activeTrainers = await this._trainerModel.countDocuments({ isBlocked: false });
+    const totalUsers = await this._userModel.countDocuments();
+    const activeUsers = await this._userModel.countDocuments({ isBlocked: false });
+    const totalBookings=await this._bookingModel.countDocuments()
+    const revenueData=await this._bookingModel.aggregate([
+      {$match:{paymentStatus:"Confirmed"}},
+      {
+        $group:{
+           _id:null,amount:{$sum:"$amount"},
+           trainerRevenue:{$sum:{$multiply:["$amount",0.9]}},
+           adminRevenue: { $sum: { $multiply: ["$amount", 0.1] } }
+
+        }
+      }
+    ])
+
+    const amount = revenueData.length > 0 ? revenueData[0].amount : 0;
+    const trainerRevenue = revenueData.length > 0 ? revenueData[0].trainerRevenue : 0;
+    const adminRevenue = revenueData.length > 0 ? revenueData[0].adminRevenue : 0;
+    const currentDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(currentDate.getMonth()-12)//past month
+
+    const userAndTrainerRegistartionData=await Promise.all([
+      this._userModel.aggregate([
+        { $match: { createdAt: { $gte: startDate } } },
+        {
+          $group: {
+            _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } }
+      ]),
   
+      this._trainerModel.aggregate([
+        { $match: { createdAt: { $gte: startDate } } },
+        {
+          $group: {
+            _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } }
+      ])
+    ])
+    const monthlyStatistics: { [key: string]: MonthlyStats } = {};
+    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+      const monthDate = new Date();
+      monthDate.setMonth(currentDate.getMonth() - monthOffset);
+      const year = monthDate.getFullYear();
+      const month = monthDate.getMonth() + 1; 
+      const key = `${year}-${month < 10 ? '0' : ''}${month}`;
+  
+      monthlyStatistics[key] = {
+        users: 0,
+        trainer: 0,
+        revenue: 0,
+        amount: 0,
+        trainerRevenue: 0,
+        adminRevenue: 0
+      };
+    }
+
+    userAndTrainerRegistartionData[0].forEach(userData => {
+      const key = `${userData._id.year}-${userData._id.month < 10 ? '0' : ''}${userData._id.month}`;
+      if (monthlyStatistics[key]) {
+        monthlyStatistics[key].users = userData.count;
+      }
+    });
+
+    userAndTrainerRegistartionData[1].forEach(trainerData => {
+      const key = `${trainerData._id.year}-${trainerData._id.month < 10 ? '0' : ''}${trainerData._id.month}`;
+      if (monthlyStatistics[key]) {
+        monthlyStatistics[key].trainer = trainerData.count;
+      }
+    });
+    const revenueByMonth = await BookingModel.aggregate([
+      { $match: { paymentStatus: "Confirmed", bookingDate: { $gte: startDate } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$bookingDate" },
+            month: { $month: "$bookingDate" }
+          },
+          amount: { $sum: "$amount" },
+          trainerRevenue: { $sum: { $multiply: ["$amount", 0.9] } },
+          adminRevenue: { $sum: { $multiply: ["$amount", 0.1] } }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+    
+    
+    revenueByMonth.forEach(revenueData => {
+      const key = `${revenueData._id.year}-${revenueData._id.month < 10 ? '0' : ''}${revenueData._id.month}`;
+      if (monthlyStatistics[key]) {
+        monthlyStatistics[key].revenue = revenueData.amount;
+        monthlyStatistics[key].amount = revenueData.amount;
+        monthlyStatistics[key].trainerRevenue = revenueData.trainerRevenue;
+        monthlyStatistics[key].adminRevenue = revenueData.adminRevenue;
+      }
+  });
+  const userTrainerChartData = Object.keys(monthlyStatistics).map(key => {
+    const [year, month] = key.split('-');
+    return {
+      year: parseInt(year, 10),
+      month: parseInt(month, 10),
+      users: monthlyStatistics[key].users,
+      trainer: monthlyStatistics[key].trainer,
+      revenue: monthlyStatistics[key].revenue,
+      amount: monthlyStatistics[key].amount,
+      trainerRevenue: monthlyStatistics[key].trainerRevenue,
+      adminRevenue: monthlyStatistics[key].adminRevenue
+    };
+  });
+    return{
+      totalTrainers,
+      activeTrainers,
+      totalUsers,
+      activeUsers,
+      trainerRevenue,
+      adminRevenue,
+      totalRevenue:amount,
+      userTrainerChartData,
+      totalBookings
+    }
+  }
 
 }
 

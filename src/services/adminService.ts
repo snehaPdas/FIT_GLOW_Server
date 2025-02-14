@@ -224,6 +224,13 @@ class AdminService implements IAdminService {
       console.error("Error updating KYC status:", error);
     }
   }
+  async getDashboardData() {
+    try {
+      return await this._adminRepository.getAllStatistics()
+    } catch (error: any) {
+      throw Error(error)
+    }
+  }
 }
 
 export default AdminService;

@@ -19,4 +19,5 @@ export interface IAdminRepository{
     getAllTrainersKycDatas():Promise<ITrainerKYC>
     updateKycStatus(status: string, trainer_id: string, rejectionReason: string | null):Promise<any>
     deleteKyc(trainer_id: string):Promise<void>
+    getAllStatistics():Promise<any>
 }

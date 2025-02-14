@@ -36,5 +36,14 @@ export interface LoginAdmin_interface {
     };
   }
 
+
+  export interface MonthlyStats {
+    users: number;        
+    trainer: number;       
+    revenue: number;      
+    amount: number;     
+    trainerRevenue: number; 
+    adminRevenue: number;
+  }
   
   
