@@ -27,7 +27,7 @@ const uploadTrainerDataFiles = upload.fields([
 
 
 router.post('/signup',trainerControllerInstance.registerTrainer.bind(trainerControllerInstance))
-router.get('/specializations', authMiddlewares(['trainer']),trainerControllerInstance.getAllSpecializations.bind(trainerControllerInstance));
+router.get('/specializations',trainerControllerInstance.getAllSpecializations.bind(trainerControllerInstance));
 router.post("/otp",trainerControllerInstance.verifyOtp.bind(trainerControllerInstance))
 router.post('/resend-otp', trainerControllerInstance.resendOtp.bind(trainerControllerInstance))
 router.post("/logintrainer",trainerControllerInstance.loginTrainer.bind(trainerControllerInstance))
@@ -46,6 +46,13 @@ router.get('/shedules/:trainerId',authMiddlewares(['trainer']), trainerControlle
 router.get(`/bookingdetails/:trainerId`,authMiddlewares(['trainer']),trainerControllerInstance.fetchbookingDetails.bind(trainerControllerInstance))
 router.get('/:trainerId', authMiddlewares(['trainer']),trainerControllerInstance.getTrainer.bind(trainerControllerInstance))
 router.get('/users/:userId', authMiddlewares(['trainer']),trainerControllerInstance.fetchUser.bind(trainerControllerInstance))
+
+router.get('/notifications/:trainer_id', authMiddlewares(['trainer']), trainerControllerInstance.getNotifications.bind(trainerControllerInstance));
+router.delete('/clear-notifications/:trainer_id', authMiddlewares(['trainer']), trainerControllerInstance.clearNotifications.bind(trainerControllerInstance));
+
+router.get('/wallet-data/:trainer_id', authMiddlewares(['trainer']), trainerControllerInstance.getWalletData.bind(trainerControllerInstance));
+
+router.post('/withdraw/:trainer_id', authMiddlewares(['trainer']), trainerControllerInstance.withdraw.bind(trainerControllerInstance));
 
 
 

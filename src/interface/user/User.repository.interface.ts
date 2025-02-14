@@ -19,14 +19,18 @@ export interface IUserRepository{
     findUserEmail(email: string):Promise<any>
     saveResetPassword(email: string, hashedPassword: string):Promise<any>
     getAllTrainers():Promise<any>
-    getAllTrainers(trainerId: string):Promise<any>
-    fetchAllSessionSchedules():Promise<any>
+    getAllTrainers(trainerId: string):Promise<Interface_Trainer[]|undefined>
+    fetchAllSessionSchedules():Promise<ISession>
     getTrainer(trainerId:string):Promise<any>
     findSessionDetails(sessionID:string):Promise<any>
     findExistingBooking(bookingDetails:IBooking):Promise<any>
     createBooking(bookingDetails:IBooking):Promise<IBooking>
+    createNotification(bookingDetails:any):Promise<any>
     fetchSpecializations():Promise<any>
     fetchUserData(userId:string):Promise<User|null>
     editUserData(userId:string,userData:User):Promise<any>
     getBookedsessionData(userId:string):Promise<any>
+    fetchNotifications(userId:string):Promise<any>
+    deleteUserNotifications(userId:string):Promise<any>
 }
+

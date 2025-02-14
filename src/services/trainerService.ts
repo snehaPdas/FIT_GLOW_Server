@@ -18,6 +18,9 @@ class TrainerService implements ITrainerService {
     constructor(trainerRepository: ITrainerRepository) {
         this._trainerRepository = trainerRepository;
       }
+  trainerService(trinerId: any): Promise<any> {
+    throw new Error("Method not implemented.");
+  }
       async findAllSpecializations() {
         try {
         const  response=await this._trainerRepository.findAllSpecializations();
@@ -31,7 +34,10 @@ class TrainerService implements ITrainerService {
       async registerTrainer(trainerData: Interface_Trainer) {
         console.log("trainer data is",trainerData)
         try {
-
+             
+          if (!trainerData.email) {
+            throw new Error("Email is required for registration");
+          }
           const existingTrainer = await this._trainerRepository.existsTrainer(trainerData);
           console.log("existingTrainer",existingTrainer)
           if(existingTrainer){
@@ -58,6 +64,10 @@ class TrainerService implements ITrainerService {
         
 
         try {
+          if (!trainerData.email) {
+            throw new Error("Trainer email is required");
+          }
+          
           const validateOtp=await this._trainerRepository.getOtpByEmail(trainerData.email)
           console.log("the validateOtp is..",validateOtp)
           if(validateOtp.length===0){
@@ -77,6 +87,9 @@ class TrainerService implements ITrainerService {
                     console.log("otp expiration not working");
           
                     console.log("OTP is valid and verified", latestOtp.expiresAt);
+                    if (!trainerData.password) {
+                      throw new Error("Password is required for OTP verification");
+                    }
                     const hashedPassword = await bcrypt.hash(trainerData.password, 10);
                     
                     const newUserData = { ...trainerData, password: hashedPassword };
@@ -184,10 +197,18 @@ class TrainerService implements ITrainerService {
             console.log("User not found")
             throw new Error("Usernotfound")
           }
+          if (!trainer.password) {
+            throw new Error("Trainer password is missing");
+          }
           const ispasswordvalid=await bcrypt.compare(password,trainer.password)
-      
+          
+          
+
           if(!ispasswordvalid){
             throw new Error("PasswordIncorrect")
+          }
+          if (!trainer.email) {
+            throw new Error("Trainer email is missing");
           }
           //Access Token Generation
          const accessToken=generateAccessToken({id:trainer._id?.toString() || "",email:trainer.email,role:"trainer"})
@@ -289,7 +310,9 @@ class TrainerService implements ITrainerService {
             );
             console.log("response check in userservice ", response);
             return response;
-          } catch (error) {}
+          } catch (error) {
+            console.log("error is",error)
+          }
         }
 
         async kycSubmit(formData: any, files: { [fieldname: string]: Express.Multer.File[] }): Promise<any> {
@@ -445,7 +468,34 @@ class TrainerService implements ITrainerService {
     async fetchUser(userId: string) {
       return await this._trainerRepository.fetchUeserDetails(userId)
     }
+
+    async getNotifications(trainerId: string) {
+      try {
+        return await this._trainerRepository.fetchNotifications(trainerId)
+      } catch (error) {
+        throw new Error('failed to find notifications')
+      }
+     }
+
+     async clearNotifications(trainerId: string) {
+      try {
+        return await this._trainerRepository.deleteTrainerNotifications(trainerId)
+      } catch (error) {
+        throw new Error('failed to delete notifications')
+      }
+     }
   
+     async getWallet(trainer_id: string) {
+      return await this._trainerRepository.fetchWalletData(trainer_id)
+    }
+  
+    async withdraw (trainer_id:string, amount: number)  {
+      try {
+        return await this._trainerRepository.withdrawMoney(trainer_id, amount)
+      } catch (error: any) {
+        throw Error(error)
+      }
+    }
 
 }
 

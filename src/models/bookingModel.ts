@@ -14,6 +14,8 @@ const bookingSchema=new Schema<IBooking>({
     amount: { type: Number, required: true },
     paymentStatus: { type: String, enum: [ "Confirmed", "Cancelled", "Completed"], default: "Confirmed" }, 
     payment_intent: {type: String, required: false },
+    dietPlan: {type: String, required: false}
+
 })
 const BookingModel =model<IBooking>("Booking",bookingSchema)
 export default BookingModel;

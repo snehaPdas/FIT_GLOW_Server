@@ -1,4 +1,4 @@
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 import { LoginAdmin_interface } from "../interface/admin_interface";
 import AdminModel from "../models/adminModel";
@@ -10,6 +10,13 @@ import TrainerModel from "../models/trainerModel";
 import KycRejectionReasonModel from "../models/kycRejectionReason";
 import { IAdminRepository } from "../interface/admin/Admin.repository.interface";
 import BaseRepository from "./base/baseRepository";
+import { promises } from "dns";
+import { IUser } from "../interface/common";
+import { IKYC, ISpecialization, ITrainerKYC } from "../interface/trainer_interface";
+type IUserDocument = IUser & Document;
+
+
+
 
 
 class AdminRepository extends BaseRepository<any> implements IAdminRepository {
@@ -29,7 +36,9 @@ class AdminRepository extends BaseRepository<any> implements IAdminRepository {
              try{
               return await AdminModel.findOne({ email });
 
-             }catch(error){console.log(error)}
+             }catch(error){
+              console.log(error)
+            }
      
     }
     async createAdmin(email:string,password:string):Promise<LoginAdmin_interface|null>{
@@ -46,8 +55,13 @@ class AdminRepository extends BaseRepository<any> implements IAdminRepository {
         throw error
        }
     }
-    async fetchAllUsers(){
+    async fetchAllUsers():Promise<IUserDocument[] |undefined>{
+      try{
         return await this._userModel.find()
+
+      }catch(error){
+        console.log("error in fetching all users",error)
+      }
 
     }
     async saveSpecialization({name,description,image}:{name:string,description:string,image:string|null}){
@@ -59,7 +73,7 @@ class AdminRepository extends BaseRepository<any> implements IAdminRepository {
       throw new Error(error.message)
     }
 }
-async getAllSpecializations() {
+async getAllSpecializations():Promise<ISpecialization[]|undefined|null> {
   try{
     return await this._specializationModel.find()
   }catch(error){
@@ -80,7 +94,7 @@ async getAllSpecializations() {
     }
 
   }
-async blockUnblockUser(user_id:string,userState:boolean){
+async blockUnblockUser(user_id:string,userState:boolean):Promise<IUser|undefined|null>{
     try{
       return await this._userModel.findByIdAndUpdate({_id:user_id},{isBlocked:userState},{new:true})
 
@@ -89,7 +103,7 @@ async blockUnblockUser(user_id:string,userState:boolean){
     }
 
 }
-async fetchKycData(trainerId:string){
+async fetchKycData(trainerId:string):Promise<IKYC|undefined|null>{
     console.log("here alsooooooo")
     try {
         const kycData=await this._kycModel.findOne({trainerId}).populate("specializationId").populate("trainerId")
@@ -103,7 +117,7 @@ async fetchKycData(trainerId:string){
 
 }
 
-async getAllTrainersKycDatas() {
+async getAllTrainersKycDatas():Promise<any> {
     return await this._trainerModel.aggregate([
       {
         $lookup: {

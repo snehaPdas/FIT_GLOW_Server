@@ -1,5 +1,8 @@
 // import AdminRepository from "../repositories/adminRepository";
 // import UserRepository from "../repositories/userRepository";
+
+ 
+
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -11,6 +14,10 @@ import { kyTemplate } from "../config/kyTemplate";
 import { IAdminService } from "../interface/admin/Admin.service.interface";
 // import { IUser } from "../interface/common";
 import { IAdminRepository } from "../interface/admin/Admin.repository.interface";
+//import {AdminLoginResponse,} from "../interface/admin_interface"
+import { IUser } from "../interface/common"
+import {ISpecialization} from "../interface/trainer_interface"
+
 
 dotenv.config();
 
@@ -93,7 +100,7 @@ class AdminService implements IAdminService {
     }
   }
 
-  async getAllUsers() :Promise<any>{
+  async getAllUsers() :Promise<IUser[]|undefined>{
     try{
       return await this._adminRepository.fetchAllUsers();
 
@@ -117,7 +124,7 @@ class AdminService implements IAdminService {
    
   }  
 
-  async getAllSpecializations():Promise<any> {
+  async getAllSpecializations():Promise<ISpecialization[]|undefined|null> {
     try{
       const specializations = await this._adminRepository.getAllSpecializations();
       return specializations;

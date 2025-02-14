@@ -22,9 +22,9 @@ class AdminController {
     this._adminService = adminServiceInstance;
   }
 
-  async adminLogin( req: Request, res: Response, next: NextFunction): Promise<any> {
+  async adminLogin( req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { email, password }: LoginAdmin_interface = req.body;
+      const { email, password }: LoginAdmin_interface = req.  body;
 
       const adminResponse = await this._adminService.adminLogin(email,password,);
       

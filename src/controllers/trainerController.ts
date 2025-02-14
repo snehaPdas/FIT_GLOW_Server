@@ -4,6 +4,7 @@ import HTTP_statusCode from "../enums/httpStatusCode";
 import TrainerService from "../services/trainerService"
 import { Interface_Trainer } from "../interface/trainer_interface";
 import {ITrainerService} from "../interface/trainer/Trainer.service.interface"
+import { IUser } from "../interface/common";
 
 
 
@@ -14,6 +15,7 @@ class TrainerController {
       this._trainerService = trainerServiceInstance;
     }
     async getAllSpecializations(req: Request, res: Response, next: NextFunction) {
+    
         try {
       
             const specializationsData =  await this._trainerService.findAllSpecializations();
@@ -205,7 +207,7 @@ class TrainerController {
           } catch (error) {
             console.log("User Controller Error",error)
             next(error)
-            return res.status(500).json({ message: "Server Error" });
+            // return res.status(500).json({ message: "Server Error" });
 
         
           }
@@ -396,7 +398,47 @@ class TrainerController {
             next(error)
           }
         }
+
+
         
+  async getNotifications(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { trainer_id } = req.params;
+      const notifications = await this._trainerService.getNotifications(trainer_id);
+      res.status(200).json(notifications);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async clearNotifications(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {trainer_id} = req.params
+      await this._trainerService.clearNotifications(trainer_id)
+      res.status(200).json({message:'Notifications cleared successfully'})
+    } catch (error) {
+      next(error)
+    }
+  }
+  async getWalletData(req: Request, res: Response, next: NextFunction) {
+    try {
+      const trinerId = req.params.trainer_id
+      const walletData = await this._trainerService.getWallet(trinerId)
+      res.status(200).json(walletData)
+    } catch (error) {
+      next(error)
+    }
+  }
+  async withdraw(req: Request, res: Response, next: NextFunction) {
+    try {
+     const {trainer_id} = req.params
+     const {amount} = req.body
+ 
+     const withdrawed = await this._trainerService.withdraw(trainer_id, amount)
+     res.status(200).json(withdrawed)
+    } catch (error) {
+     next(error)
+    }
+   }
         
 }
 

@@ -288,6 +288,9 @@ async createBooking(req: Request, res: Response, next: NextFunction){
       userId,
       stripe_session_id
     );
+    console.log("+++++++++++++++++++++",bookingDetails.bookingData)
+    console.log("_____________________________",bookingDetails)
+    res.status(200).json(bookingDetails);
   } catch (error) {
     console.log("Error in create booking in controller",error);
   }
@@ -340,6 +343,27 @@ async getBookedsessionData(req: CustomRequest, res: Response, next: NextFunction
 
   }
 }
+
+async getNotifications(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { user_id } = req.params;
+    const notifications = await this._userService.getNotifications(user_id);
+    res.status(200).json(notifications);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async clearNotifications(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { user_id } = req.params;
+    await this._userService.clearNotifications(user_id);
+    res.status(200).json({ message: "Notifications cleared successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
 
 }
 

@@ -30,12 +30,15 @@ const userControllerInstance = new UserController(userServiceInstance);
  router.post("/payment/:sessionId",isblocked, authMiddlewares(['user']), userControllerInstance.checkoutPayment.bind(userControllerInstance))
  
  router.post("/bookings",authMiddlewares(['user']),userControllerInstance.createBooking.bind(userControllerInstance))
+ 
  router.get("/specializations",authMiddlewares(['user']),userControllerInstance.fetchAllSpecializations.bind(userControllerInstance))
  router.get('/users/:userId',authMiddlewares(['user']),userControllerInstance.getUser.bind(userControllerInstance))
  router.patch("/users",authMiddlewares(['user']),userControllerInstance.editUserData.bind(userControllerInstance))
  router.get("/booking-details",authMiddlewares(['user']),authMiddlewares(['user']),userControllerInstance.getBookedsessionData.bind(userControllerInstance))
 
 
+ router.get('/notifications/:user_id', authMiddlewares(['user']), userControllerInstance.getNotifications.bind(userControllerInstance)); 
+ router.delete('/clear-notifications/:user_id', authMiddlewares(['user']), userControllerInstance.clearNotifications.bind(userControllerInstance));
 
 
 

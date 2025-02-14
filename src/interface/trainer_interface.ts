@@ -2,18 +2,18 @@
     import mongoose, { Types } from "mongoose";
 
     export interface Interface_Trainer{
-        length: number;
+        length?: number;
         filter(arg0: (trainer: { isBlocked: boolean; kycStatus: string; }) => boolean): unknown;
         _id?: Types.ObjectId;
         id?: string; 
-        name: string;
-        phone: number;
-        email: string;
-        password: string;
+        name?: string;
+        phone?: number;
+        email?: string;
+        password?: string;
         isBlocked?: boolean;
         specializations?: Types.ObjectId[];
-        kycStatus:string,
-        profileImage:string
+        kycStatus?:string,
+        profileImage?:string
 
 
     }
@@ -62,4 +62,10 @@ export interface ISpecialization {
 export interface ISessionDetails {
   trainerId: string;
   price: number;
+}
+export interface ITrainerKYC extends Document {
+  _id: Types.ObjectId;
+  name: string;
+  email: string;
+  kycData: IKYC; // Embedded KYC data
 }

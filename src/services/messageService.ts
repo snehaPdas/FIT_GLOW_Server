@@ -65,6 +65,7 @@ class MessageService {
         conversationId: existingConversation._id,
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const savedMessage: any = await newMessage.save();
 
    existingConversation.messages.push(savedMessage);
@@ -80,8 +81,9 @@ if (receiverSocketId) {
 
     return savedMessage;
 }
-
-////////////////////////////////////////////////////////
+///////
+////////////////
+/////////////////////////
 async getMessage(senderId: string, userToChatId: string) {
   const senderObjectId = new mongoose.Types.ObjectId(senderId);
   const receiverObjectId = new mongoose.Types.ObjectId(userToChatId);

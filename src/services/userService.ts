@@ -13,6 +13,7 @@ import mongoose from "mongoose";
 import { IUserService } from "../interface/user/User.service.interface";
 import { IUserRepository } from "../interface/user/User.repository.interface";
 import {User} from "../interface/user_interface"
+import { Interface_Trainer } from "../interface/trainer_interface";
 
 class UserService implements IUserService {
   private _userRepository: IUserRepository;
@@ -312,7 +313,7 @@ class UserService implements IUserService {
     }
   }
 
-  async getAllTrainers(){
+  async getAllTrainers():Promise<any>{
     
     console.log("ïn service")
     try {
@@ -435,6 +436,11 @@ try {
         throw new Error("Booking already exists.");
       }
       const bookingData=await this._userRepository.createBooking(bookingDetails)
+      await this._userRepository.createNotification(bookingData)
+
+      
+      return bookingData
+
       
     } catch (error) {
       console.log("error in fetching userservice",error)
@@ -475,6 +481,21 @@ try {
     }
 
   }
+  async getNotifications(userId: string) {
+    try {
+      return await this._userRepository.fetchNotifications(userId)
+    } catch (error) {
+      throw new Error('failed to find notifications')
+    }
+   }
+
+   async clearNotifications(userId: string) {
+    try {
+      return await this._userRepository.deleteUserNotifications(userId)
+    } catch (error) {
+      throw new Error('failed to delete notifications')
+    }
+   }
 }
 
 export default UserService;

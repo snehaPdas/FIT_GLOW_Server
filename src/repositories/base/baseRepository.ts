@@ -1,4 +1,4 @@
-import mongoose, { Model, Document } from 'mongoose';
+import { Model, Document } from 'mongoose';
 class BaseRepository<T extends Document> {
     private _model: Model<T>;
     constructor(model: Model<T>) {

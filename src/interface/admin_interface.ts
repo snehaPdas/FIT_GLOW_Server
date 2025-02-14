@@ -16,4 +16,25 @@ export interface LoginAdmin_interface {
     createdAt: Date;
     isListed: boolean;
 
-  }                         
+  }    
+  
+  export interface AdminLoginResponse {
+    status: number;
+    accessToken: string;
+    refreshToken: string;
+    success: boolean;
+    message: string;
+
+
+    admin: {
+      id: string;
+      name: string;
+      email: string;
+      password: string;  
+
+    
+    };
+  }
+
+  
+  

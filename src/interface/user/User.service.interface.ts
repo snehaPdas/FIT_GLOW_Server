@@ -17,11 +17,13 @@ export interface IUserService{
     getSessionSchedules():Promise<any>
     getTrainer(trainerId:string):Promise<any>
     checkoutPayment(sessionID:string,userId:string):Promise<any>
-    findBookingDetails(session_id: string, user_id: string, stripe_session_id: string):Promise<void>
+    findBookingDetails(session_id: string, user_id: string, stripe_session_id: string):Promise<any>
     fetchSpecialization():Promise<any>
     fechtUserData(userId:string):Promise<User|null>
     editUserData(userId:string,userData:User):Promise<any>
     getBookedsessionData(userId:string|undefined):Promise<any>
+    getNotifications(user_id:any):Promise<any>
+    clearNotifications(user_id:any):Promise<any>
 
 
 }

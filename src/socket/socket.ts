@@ -51,6 +51,7 @@ socket.on('sendMessage', (data) => {
 
   socket.on("outgoing-video-call", (data) => {
     const userSocketId = getReceiverSocketId(data.to);
+    
     if (userSocketId) {
       io.to(userSocketId).emit('incoming-video-call', {
         _id: data.to,
@@ -118,6 +119,28 @@ socket.on('sendMessage', (data) => {
       socket.to(friendSocketId).emit("user-left",data.to);
     }
   });
+
+  socket.on("newBookingNotification", (data) => {
+
+    const receiverSocketId = getReceiverSocketId(data.receiverId);
+  
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("receiveNewBooking", data.content);
+    } else {
+      console.warn("Receiver not connected:", data.receiverId);
+    }
+  });
+  socket.on('cancelTrainerNotification', (data) => {
+    const receiverSocketId = getReceiverSocketId(data.recetriverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("receiveCancelNotificationForTrainer", data.content);
+      console.log("Notification sent to client:", data);
+    } else {
+      console.warn("No receiverSocketId found for receiverId:", data.receiverId);
+    }
+  });
+
+  
 
 
   socket.on("disconnect", () => {

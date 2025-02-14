@@ -2,7 +2,7 @@ import SpecializationModel from "../models/specializationModel";
 import TrainerModel from "../models/trainerModel";
 import { Interface_Trainer } from "../interface/trainer_interface";
 import OtpModel from "../models/otpModel";
-import { IOtp } from "../interface/common";
+import { IOtp, ITransaction } from "../interface/common";
 import mongoose, { Types } from "mongoose";
 import KYCModel from "../models/KYC_Models";
 import { ISession } from "../interface/trainer_interface";
@@ -13,6 +13,8 @@ import moment from "moment";
 import { ITrainerRepository } from "../interface/trainer/Trainer.repository.interface";
 import UserModel from "../models/userModel";
 import BaseRepository from "./base/baseRepository";
+import NotificationModel from "../models/notificationModel";
+import WalletModel from "../models/walletModel";
 
 class TrainerRepository extends BaseRepository<any> implements  ITrainerRepository{
   
@@ -22,6 +24,8 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
   private _kycModel = KYCModel;
   private _sessionModel=SessionModel
   private _bookingModel=BookingModel
+  private _notificationModel=NotificationModel
+  private _walletModel=WalletModel
 
   constructor() {
     super(TrainerModel);  
@@ -79,9 +83,12 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
       throw error;
     }
   }
-  async createNewUser(trainerData: Interface_Trainer): Promise<void> {
+  async createNewUser(trainerData: Interface_Trainer): Promise<any> {
     try {
       console.log("trainer data have reached in repository",trainerData)
+      if (!trainerData.email) {
+        throw new Error("Email is required");
+      }
       const userexisted = await this.existingUser(trainerData.email);
       if (userexisted) {
         throw new Error("Email already exists");
@@ -434,6 +441,65 @@ try {
       throw error;
     }
   }
+  
+  async fetchNotifications(trainerId: string) {
+    try {
+      const notificationsDoc = await this._notificationModel.findOne({ receiverId: trainerId });
+      if (notificationsDoc && notificationsDoc.notifications) {
+        notificationsDoc.notifications.sort((a, b) => {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+      }
+      return notificationsDoc;
+    } catch (error) {
+      console.error('Error finding notifications');
+      throw new Error('Failed to find notifications')
+      
+    }
+  }
+  async deleteTrainerNotifications(trainerId: string) {
+    try {
+      await this._notificationModel.deleteOne({receiverId: trainerId})
+    } catch (error) {
+      console.error('Error delete notifications');
+      throw new Error('Failed to delete notifications');
+    }
+  }
+
+  async fetchWalletData(trainer_id: string) {
+    try {
+      const walletData = await this._walletModel.findOne({
+        trainerId: trainer_id,
+      });
+      return walletData;
+    } catch (error) {}
+  }
+  async withdrawMoney(trainer_id: string, amount: number) {
+    try {
+      const wallet = await this._walletModel.findOne({ trainerId: trainer_id });
+      if (!wallet) {
+        throw new Error("Wallet not found for the specified Trainer.");
+      }
+      if (wallet.balance < amount) {
+        throw new Error("Insufficient balance for withdrawal.");
+      }
+      wallet.balance -= amount;
+      const transactionId =
+        "txn_" + Date.now() + Math.floor(Math.random() * 10000);
+      const transaction: ITransaction = {
+        amount: amount,
+        transactionId: transactionId,
+        transactionType: "debit",
+      };
+      wallet.transactions.push(transaction);
+      await wallet.save();
+      return wallet;
+    } catch (error: any) {
+      console.error("Error processing withdrawal:", error.message);
+      throw new Error(error.message);
+    }
+  }
+
 }
 
 export default TrainerRepository;

@@ -25,4 +25,8 @@ export interface ITrainerRepository{
     editStoreSessionData(sessionId:string,sessionData:any):Promise<any>
     fetchTrainer(trainer_id:string):Promise<any>
     fetchUeserDetails(userId:string):Promise<any>
+    fetchNotifications(trainerId:any):Promise<any>
+    deleteTrainerNotifications(trainerId:any):Promise<any>
+    fetchWalletData(trainer_id:any):Promise<any>
+    withdrawMoney(trainer_id:any,amount:any):Promise<any>
 }

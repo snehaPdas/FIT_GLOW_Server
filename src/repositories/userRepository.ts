@@ -1,16 +1,18 @@
-import { IBooking, IOtp, IUser } from "../interface/common";
+import { IBooking, INotification, INotificationContent, IOtp, IUser } from "../interface/common";
 import UserModel from "../models/userModel";
 import OtpModel from "../models/otpModel";
 import mongoose from "mongoose";
 import { User } from "../interface/user_interface";
 import TrainerModel from "../models/trainerModel";
 import SessionModel from "../models/sessionModel";
-import { ISpecialization } from "../interface/trainer_interface";
+import { Interface_Trainer, ISession, ISpecialization } from "../interface/trainer_interface";
 import BookingModel from "../models/bookingModel";
 import SpecializationModel from "../models/specializationModel";
 import { IUserRepository } from "../interface/user/User.repository.interface";
 import BaseRepository from "./base/baseRepository";
-
+import NotificationModel from "../models/notificationModel";
+import WalletModel from "../models/walletModel";
+import { ITransaction } from "../models/walletModel";
 class UserRepository extends BaseRepository<any>  implements IUserRepository  {
   deleteOtpByEmail(useremail: string) {
     throw new Error("Method not implemented.");
@@ -21,6 +23,8 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
   private _sessionModel=SessionModel
   private _bookingModel=BookingModel
   private _specializationModel=SpecializationModel
+  private _notificationModel=NotificationModel
+  private _walletModel=WalletModel
 
 
   constructor() {
@@ -144,7 +148,7 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
       throw error;
     }
   }
-  async getAllTrainers(){
+  async getAllTrainers():Promise<Interface_Trainer[]|undefined>{
     console.log("ïn repo")
     try{
     const trainers=await this._trainerModel.find({}).populate("specializations","name")
@@ -156,7 +160,7 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
    console.log("error fetching trainersn in repository",error)
     }
   }
-  async fetchAllSessionSchedules() {
+  async fetchAllSessionSchedules():Promise<any> {
     try {
       const schedules = await this._sessionModel.find({}).populate('specializationId')
       return schedules;
@@ -214,12 +218,109 @@ async createBooking(bookingDetails:IBooking){
   try {
     console.log("booking details is",bookingDetails)
     const bookingnew =await this._bookingModel.create(bookingDetails)
+    //calculating 90% an storing into wallet
+    if (!bookingDetails.amount) {
+      console.warn("Booking amount is undefined. Skipping wallet update.");
+      return bookingnew
+
+    }
+    const transactionAmount=0.9*bookingDetails.amount
+    const transactionId = "txn_" + Date.now() + Math.floor(Math.random() * 10000);
+
+    let wallet = await this._walletModel.findOne({ trainerId: bookingDetails.trainerId });
+    const transaction: ITransaction = {
+      amount: transactionAmount,
+      transactionId: transactionId,
+      transactionType: "credit",
+      bookingId: bookingnew._id.toString(),
+      date: new Date(),
+    };
+    if (wallet) {
+      
+      wallet.transactions.push(transaction);
+      wallet.balance += transactionAmount;
+      await wallet.save();
+    } else {
+      
+      wallet = new WalletModel({
+        trainerId: bookingDetails.trainerId,
+        balance: transactionAmount,
+        transactions: [transaction],
+      });
+      await wallet.save();
+    }
+    
+
     return bookingnew
   } catch (error) {
     console.error("Error creating booking:", error);
       throw new Error("Failed to create booking.");
   }
 
+}
+
+async createNotification(bookingDetails: IBooking){
+  console.log("booking details for notifivcation check",bookingDetails)
+try{
+  if (!bookingDetails.trainerId || !bookingDetails.userId) {
+    throw new Error("Trainer ID or User ID is missing.");
+}
+const trainerNotificationContent:INotificationContent={
+  content:`New Booking for (${bookingDetails.sessionType})on(${bookingDetails.startDate.toDateString()}) at (${bookingDetails.startTime})
+  .Amount:${bookingDetails.amount}.`,
+  bookingId:new mongoose.Types.ObjectId(bookingDetails.sessionId),
+  read:false,
+  createdAt:new Date(),
+}
+const userNotificationContent: INotificationContent = {
+  content: `Your ${bookingDetails.sessionType} (${
+    bookingDetails.specialization
+  }) on ${bookingDetails.startDate.toDateString()} at ${
+    bookingDetails.startTime
+  } is confirmed. Amount: $${bookingDetails.amount}.`,
+  bookingId: new mongoose.Types.ObjectId(bookingDetails.sessionId),
+  read: false,
+  createdAt: new Date(),
+}
+const existingTrainerNotification=await this._notificationModel.findOne({receiverId:bookingDetails.trainerId})
+
+if (existingTrainerNotification) {
+  existingTrainerNotification.notifications.push(
+    trainerNotificationContent
+  );
+  await existingTrainerNotification.save();
+}else{
+    const newTrainerNotification:INotification={
+      receiverId:bookingDetails.trainerId,
+      notifications:[trainerNotificationContent]
+    }
+    await this._notificationModel.create(newTrainerNotification)
+  }
+  const userReceiverId = 
+  bookingDetails.userId instanceof mongoose.Types.ObjectId 
+    ? bookingDetails.userId 
+    : undefined; 
+
+if (!userReceiverId) {
+  throw new Error("Invalid userId: Expected ObjectId but got an object.");
+}
+  const existingUserNotification = await this._notificationModel.findOne({
+    receiverId: bookingDetails.userId,
+  });
+  if (existingUserNotification) {
+    existingUserNotification.notifications.push(userNotificationContent);
+    await existingUserNotification.save();
+  } else {
+    const newUserNotification: INotification = {
+      receiverId: userReceiverId,
+      notifications: [userNotificationContent],
+    }
+    await this._notificationModel.create(newUserNotification);
+  }
+
+}catch(error){
+console.log("Error in creating Notification",error)
+}
 }
 async fetchSpecializations(){
   try {
@@ -272,6 +373,33 @@ async getBookedsessionData(userId:string){
     console.log("Error in fetching userData in repository",error)
   }
 }
+async fetchNotifications(userId: string) {
+  try {
+    const notificationsDoc = await this._notificationModel.findOne({
+      receiverId: userId,
+    });
+
+    if (notificationsDoc?.notifications?.length) {
+      notificationsDoc.notifications.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+
+    return notificationsDoc;
+  } catch (error) {
+    throw new Error("Failed to find notifications");
+  }
+}
+
+async deleteUserNotifications(userId: string) {
+  try {
+    await this._notificationModel.deleteOne({ receiverId: userId });
+  } catch (error) {
+    throw new Error("Failed to delete notifications");
+  }
+}
+
 
 }
 

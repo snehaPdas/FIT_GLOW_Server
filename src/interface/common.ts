@@ -51,5 +51,25 @@ export interface IUser {
     createdAt: Date; 
   updatedAt: Date; 
   payment_intent?: string;
+  dietPlan?: string,
 
   }
+
+  export interface INotificationContent {
+    content: string;
+    bookingId: mongoose.Types.ObjectId;
+    read: boolean;
+    createdAt: Date;
+  }
+  
+  export interface INotification {
+    receiverId: mongoose.Types.ObjectId|string
+    notifications: INotificationContent[];
+  }
+  export interface ITransaction {
+    amount: number;             
+    transactionId: string;      
+    transactionType: 'credit' | 'debit';
+    date?: Date;                
+    bookingId?: string;         
+}
