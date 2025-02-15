@@ -497,6 +497,14 @@ class TrainerService implements ITrainerService {
       }
     }
 
+    async getDashboardData() {
+      try {
+        return await this._trainerRepository.getAllStatistics()
+      } catch (error: any) {
+        throw Error(error)
+      }
+    }
+
 }
 
 

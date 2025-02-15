@@ -439,8 +439,43 @@ class TrainerController {
      next(error)
     }
    }
+   async getDashboardData(req: Request, res: Response, next: NextFunction) {
+    console.log("AAAAAAAA")
+    try {
+      const response = await this._trainerService.getDashboardData()
+      console.log("@@@@@@@@@@@@@@@@@",response)
+      res.status(200).json({data: response})
+    } catch (error) {
+      next(error)
+    }
+ 
+   
+
+
+  } 
+  async dietPlan(req: Request, res: Response, next: NextFunction){
+    console.log("sssssssssss")
+    console.log("Incoming request body:", req.body); // Log full body
+
+try {
+  const dietPlans=req.body
+  const dietPlan=req.body
+  console.log("dietplan ssssssssssss",dietPlans)
+  console.log("trainerssssssssssss",dietPlan.trainerId)
+
+  
+} catch (error) {
+  console.log("Error is",error)
+}
+  }
+
+
+  
+  
         
 }
+
+
 
 
 export default TrainerController;

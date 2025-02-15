@@ -25,4 +25,6 @@ export interface ITrainerService{
     clearNotifications(trainer_id:any):Promise<any>
     getWallet(trinerId:any):Promise<any>
     withdraw(trainer_id:any,amount:any):Promise<any>
+     getDashboardData():Promise<any>
+    
 }

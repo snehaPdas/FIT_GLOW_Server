@@ -29,4 +29,5 @@ export interface ITrainerRepository{
     deleteTrainerNotifications(trainerId:any):Promise<any>
     fetchWalletData(trainer_id:any):Promise<any>
     withdrawMoney(trainer_id:any,amount:any):Promise<any>
+     getAllStatistics():Promise<any>
 }

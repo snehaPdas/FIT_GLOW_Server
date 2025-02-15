@@ -54,7 +54,9 @@ router.get('/wallet-data/:trainer_id', authMiddlewares(['trainer']), trainerCont
 
 router.post('/withdraw/:trainer_id', authMiddlewares(['trainer']), trainerControllerInstance.withdraw.bind(trainerControllerInstance));
 
+router.get('/dashboard/:trainer_id', authMiddlewares(['trainer']),trainerControllerInstance.getDashboardData.bind(trainerControllerInstance));
 
+ router.post('/store-diet-plan/:userId', authMiddlewares(['trainer']),trainerControllerInstance.dietPlan.bind(trainerControllerInstance));
 
 
 

@@ -69,3 +69,12 @@ export interface ITrainerKYC extends Document {
   email: string;
   kycData: IKYC; // Embedded KYC data
 }
+
+
+export interface MonthlyStats {
+  trainer: any;
+  trainerRevenue: any;
+  users: number;               
+  revenue: number;      
+  amount: number;     
+}

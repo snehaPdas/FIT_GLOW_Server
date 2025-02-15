@@ -52,3 +52,9 @@ app.use(errorMiddleware);
 server.listen( 3000, () => {
     console.log(`Server is running on port ${process.env.PORT || 3000}`);
   });
+
+
+  
+app.get("/dashboardDatas", (req, res) => {
+  res.send("Trainer Dashboard Data");
+});
