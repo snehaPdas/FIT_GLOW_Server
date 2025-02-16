@@ -26,5 +26,6 @@ export interface ITrainerService{
     getWallet(trinerId:any):Promise<any>
     withdraw(trainer_id:any,amount:any):Promise<any>
      getDashboardData():Promise<any>
-    
+     dietPlan(userId:string,dietPlans:any):Promise<any>
+     getDietPlan(userId:string):Promise<any>
 }

@@ -30,4 +30,6 @@ export interface ITrainerRepository{
     fetchWalletData(trainer_id:any):Promise<any>
     withdrawMoney(trainer_id:any,amount:any):Promise<any>
      getAllStatistics():Promise<any>
+     dietPlan(userId:string,dietPlans:any):Promise<any>
+     fetchDietPlan(userId:string):Promise<any>
 }

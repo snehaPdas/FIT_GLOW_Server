@@ -440,7 +440,6 @@ class TrainerController {
     }
    }
    async getDashboardData(req: Request, res: Response, next: NextFunction) {
-    console.log("AAAAAAAA")
     try {
       const response = await this._trainerService.getDashboardData()
       console.log("@@@@@@@@@@@@@@@@@",response)
@@ -449,28 +448,38 @@ class TrainerController {
       next(error)
     }
  
-   
-
 
   } 
   async dietPlan(req: Request, res: Response, next: NextFunction){
-    console.log("sssssssssss")
-    console.log("Incoming request body:", req.body); // Log full body
+    
+    console.log("Incoming request body:", req.body); 
 
 try {
+  const {userId}=req.params
   const dietPlans=req.body
-  const dietPlan=req.body
-  console.log("dietplan ssssssssssss",dietPlans)
-  console.log("trainerssssssssssss",dietPlan.trainerId)
-
   
+  console.log("dietplan ssssssssssss",dietPlans)
+  console.log("trainerssssssssssss",dietPlans.trainerId)
+  console.log("trainerssssssssssss",userId)
+ const response=await this._trainerService.dietPlan(userId,dietPlans)
+ res.status(201).json({ message: "Diet Plan added successfully", dietPlan: response });
+
 } catch (error) {
   console.log("Error is",error)
 }
   }
 
 
-  
+  async getDietPlan(req: Request, res: Response, next: NextFunction) {
+    console.log("&&&&&&&&&&&????????")
+    try {
+      const { userId } = req.params;
+      const dietplandetails = await this._trainerService.getDietPlan(userId);
+      res.status(200).json(dietplandetails);
+    } catch (error) {
+      next(error);
+    }
+  }
   
         
 }

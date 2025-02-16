@@ -139,7 +139,7 @@ async loginUser(req:Request,res:Response,next:NextFunction){
      res.status(HTTP_statusCode.NotFound).json({message:"user not found"})
     }
     else if(error.message==="PasswordIncorrect"){
-      res.status(HTTP_statusCode.Unauthorized).json({message:"invalid credentials"})
+      res.status(HTTP_statusCode.NotFound).json({message:"invalid credentials"})
      }else{
       next(error)
      }
@@ -362,6 +362,20 @@ async clearNotifications(req: Request, res: Response, next: NextFunction) {
   } catch (error) {
     next(error);
   }
+}
+
+async getDietPlan(req: Request, res: Response, next: NextFunction){
+  
+  try {
+    const { trainerId } = req.params;
+    const {userId}=req.params
+    const debitplandetails = await this._userService.getDietPlan(trainerId,userId);
+    res.status(200).json(debitplandetails);
+
+  } catch (error) {
+    next(error)
+  }
+
 }
 
 

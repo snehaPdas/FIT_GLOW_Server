@@ -24,6 +24,7 @@ export interface IUserService{
     getBookedsessionData(userId:string|undefined):Promise<any>
     getNotifications(user_id:any):Promise<any>
     clearNotifications(user_id:any):Promise<any>
+    getDietPlan(trainerId:string,userId:string):Promise<any>
 
 
 }

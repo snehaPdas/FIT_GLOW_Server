@@ -58,6 +58,7 @@ router.get('/dashboard/:trainer_id', authMiddlewares(['trainer']),trainerControl
 
  router.post('/store-diet-plan/:userId', authMiddlewares(['trainer']),trainerControllerInstance.dietPlan.bind(trainerControllerInstance));
 
+ router.get('/get-diet-plan/:userId', authMiddlewares(['trainer']), trainerControllerInstance.getDietPlan.bind(trainerControllerInstance));
 
 
 

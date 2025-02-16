@@ -496,6 +496,17 @@ try {
       throw new Error('failed to delete notifications')
     }
    }
+
+   async getDietPlan(trainerId:string,userId:string){
+    try {
+      return await this._userRepository.fetchDietPlan(trainerId,userId)
+
+    } catch (error) {
+      throw new Error('failed to fetch dietplan')
+
+    }
+
+   }
 }
 
 export default UserService;

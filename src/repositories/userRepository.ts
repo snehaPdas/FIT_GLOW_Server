@@ -13,6 +13,7 @@ import BaseRepository from "./base/baseRepository";
 import NotificationModel from "../models/notificationModel";
 import WalletModel from "../models/walletModel";
 import { ITransaction } from "../models/walletModel";
+import DietPlanModel from "../models/dietPlanModel";
 class UserRepository extends BaseRepository<any>  implements IUserRepository  {
   deleteOtpByEmail(useremail: string) {
     throw new Error("Method not implemented.");
@@ -25,6 +26,7 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
   private _specializationModel=SpecializationModel
   private _notificationModel=NotificationModel
   private _walletModel=WalletModel
+  private _dietPlanModel=DietPlanModel
 
 
   constructor() {
@@ -399,7 +401,19 @@ async deleteUserNotifications(userId: string) {
     throw new Error("Failed to delete notifications");
   }
 }
+async fetchDietPlan(trainderId:string,userId:string){
+  try {
+    const dietPlnDetails = await this._dietPlanModel.findOne({
+      trainerId:trainderId,
+      userId:userId
+    })
+    return dietPlnDetails
 
+  } catch (error) {
+    
+  }
+
+}
 
 }
 

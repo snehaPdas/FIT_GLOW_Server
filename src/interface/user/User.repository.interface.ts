@@ -32,5 +32,6 @@ export interface IUserRepository{
     getBookedsessionData(userId:string):Promise<any>
     fetchNotifications(userId:string):Promise<any>
     deleteUserNotifications(userId:string):Promise<any>
+    fetchDietPlan(trainerId:string,userId:string):Promise<any>
 }
 

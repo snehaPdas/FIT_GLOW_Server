@@ -505,6 +505,26 @@ class TrainerService implements ITrainerService {
       }
     }
 
+    async dietPlan(userId:string,dietPlans:any){
+      try {
+        return await this._trainerRepository.dietPlan(userId,dietPlans)
+
+
+      } catch (error) {
+        console.log("Error",error)
+      }
+    }
+
+    async getDietPlan(userId: string) {
+      try {
+        return await this._trainerRepository.fetchDietPlan(userId)
+      } catch (error) {
+        throw new Error('failed to find dietplan')
+      }
+     }
+
+
+
 }
 
 

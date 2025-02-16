@@ -40,6 +40,9 @@ const userControllerInstance = new UserController(userServiceInstance);
  router.get('/notifications/:user_id', authMiddlewares(['user']), userControllerInstance.getNotifications.bind(userControllerInstance)); 
  router.delete('/clear-notifications/:user_id', authMiddlewares(['user']), userControllerInstance.clearNotifications.bind(userControllerInstance));
 
+ router.get('/dietplan/:trainerId/:userId', authMiddlewares(['user']), userControllerInstance.getDietPlan.bind(userControllerInstance));
+
+
 
 
 

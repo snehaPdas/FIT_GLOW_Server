@@ -16,6 +16,7 @@ import BaseRepository from "./base/baseRepository";
 import NotificationModel from "../models/notificationModel";
 import WalletModel from "../models/walletModel";
 import { MonthlyStats } from "../interface/trainer_interface";
+import DietPlanModel from "../models/dietPlanModel";
 
 class TrainerRepository extends BaseRepository<any> implements  ITrainerRepository{
   
@@ -28,6 +29,7 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
   private _notificationModel=NotificationModel
   private _walletModel=WalletModel
   private _userModel=UserModel
+  private _dietPlanModel=DietPlanModel
 
   constructor() {
     super(TrainerModel);  
@@ -642,6 +644,59 @@ try {
         userTrainerChartData,
         trainerWiseData
     };
+}
+async dietPlan(userId: string, dietPlans: any) {
+  try {
+    if (!userId || !dietPlans.trainerId) {
+      throw new Error("Missing userId or trainerId");
+    }
+
+    // Check if a diet plan already exists for the user
+    const existingPlan = await this._dietPlanModel.findOne({ userId });
+
+    if (existingPlan) {
+      // Update existing plan
+      const updatedPlan = await this._dietPlanModel.findOneAndUpdate(
+        { userId },
+        { $set: dietPlans },
+        { new: true } // Return updated document
+      );
+      console.log("Diet Plan updated successfully:", updatedPlan);
+      return updatedPlan;
+    } else {
+      // Create a new diet plan if none exists
+      const newDietPlan = new this._dietPlanModel({
+        userId: userId,
+        trainerId: dietPlans.trainerId,
+        morning: dietPlans.morning,
+        lunch: dietPlans.lunch || "",
+        evening: dietPlans.evening,
+        night: dietPlans.night,
+        totalCalories: dietPlans.totalCalories,
+      });
+
+      const savedDietPlan = await newDietPlan.save();
+      console.log("Diet Plan saved successfully:", savedDietPlan);
+      return savedDietPlan;
+    }
+  } catch (error) {
+    console.log("Error:", error);
+  }
+}
+
+
+async fetchDietPlan(userId:string){
+  try {
+    const dietPlnDetails = await this._dietPlanModel.findOne(
+      {userId:userId},
+      { _id: 0, userId: 0, trainerId: 0, createdAt: 0, __v: 0 }
+    )
+    return dietPlnDetails
+
+  } catch (error) {
+    
+  }
+
 }
 
 }
