@@ -699,6 +699,29 @@ async fetchDietPlan(userId:string){
 
 }
 
+async getTrainerProfile(trainer_id: string) {
+  try {
+    const trainerData = await this._trainerModel.findById(trainer_id) 
+    return trainerData?.profileImage
+  } catch (error) {
+    
+  }
+}
+
+async updateTrainerData(trainer_id: string) {
+  try {
+    const existingTrainer = await this._trainerModel.findById(trainer_id);
+    if (!existingTrainer) {
+      throw new Error("Trainer not found");
+    }
+    return existingTrainer;
+  } catch (error) {
+    console.error("Error in repository layer:", error);
+    throw new Error("Failed to update trainer data");
+  }
+}
+
+
 }
 
 export default TrainerRepository;

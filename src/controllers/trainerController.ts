@@ -5,6 +5,7 @@ import TrainerService from "../services/trainerService"
 import { Interface_Trainer } from "../interface/trainer_interface";
 import {ITrainerService} from "../interface/trainer/Trainer.service.interface"
 import { IUser } from "../interface/common";
+import { uploadToCloudinary } from "../config/clodinary";
 
 
 
@@ -480,6 +481,37 @@ try {
       next(error);
     }
   }
+
+  async updateTrainer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const trainer_id = req.params.trainer_id;
+      const trainerData = req.body;
+      const existingTrainerProfile = await this._trainerService.fetchTrainer(trainer_id)
+      if(existingTrainerProfile) {
+         await deleteFromCloudinary(existingTrainerProfile)
+      }
+      const documents: { [key: string]: string | undefined } = {};
+      if (req.file) {
+        const profileImageUrl:any = await uploadToCloudinary(
+          req.file.buffer,
+          "trainer_profileImage"
+        );
+        documents.profileImage = profileImageUrl.secure_url;
+      }
+      const updatedTrainerData = { ...trainerData, ...documents };
+      const updatedTrainer = await this._trainerService.updateTrainer(
+        trainer_id,
+        updatedTrainerData
+      );
+      res.status(200).json({
+        message: "Trainer updated successfully",
+        updatedTrainer,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  
   
         
 }
@@ -488,3 +520,7 @@ try {
 
 
 export default TrainerController;
+function deleteFromCloudinary(existingTrainerProfile: any) {
+  throw new Error("Function not implemented.");
+}
+

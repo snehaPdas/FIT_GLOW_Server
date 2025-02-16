@@ -28,4 +28,6 @@ export interface ITrainerService{
      getDashboardData():Promise<any>
      dietPlan(userId:string,dietPlans:any):Promise<any>
      getDietPlan(userId:string):Promise<any>
+     fetchTrainer(trainder_Id:string):Promise<any>
+     updateTrainer(trainer_id:string,updatedTrainerData:any):Promise<any>
 }

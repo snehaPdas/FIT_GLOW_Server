@@ -78,3 +78,22 @@ export interface MonthlyStats {
   revenue: number;      
   amount: number;     
 }
+
+export interface ITrainer {
+  _id?: Types.ObjectId;
+  id?: string; 
+  name: string;
+  phone: number;
+  email: string;
+  password: string;
+  dob?: string;
+  profileImage?: string;
+  gender?: 'male' | 'female' | 'other' | ''; 
+  yearsOfExperience?: number;
+  language?: string;
+  specializations: Types.ObjectId[];
+  about?: string
+  dailySessionLimit: number 
+  kycStatus: 'pending' | 'approved' | 'submitted' | 'rejected';
+  isBlocked?: boolean;
+}

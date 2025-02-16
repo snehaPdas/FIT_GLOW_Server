@@ -262,24 +262,23 @@ async createBooking(bookingDetails:IBooking){
 }
 
 async createNotification(bookingDetails: IBooking){
-  console.log("booking details for notifivcation check",bookingDetails)
+  console.log("booking details for notifivcation check>>>>>>>>>.",bookingDetails)
 try{
   if (!bookingDetails.trainerId || !bookingDetails.userId) {
     throw new Error("Trainer ID or User ID is missing.");
+
 }
 const trainerNotificationContent:INotificationContent={
-  content:`New Booking for (${bookingDetails.sessionType})on(${bookingDetails.startDate.toDateString()}) at (${bookingDetails.startTime})
+  content:`New Booking for Session on ${bookingDetails.startDate.toDateString()} at (${bookingDetails.startTime})
   .Amount:${bookingDetails.amount}.`,
   bookingId:new mongoose.Types.ObjectId(bookingDetails.sessionId),
   read:false,
   createdAt:new Date(),
 }
 const userNotificationContent: INotificationContent = {
-  content: `Your ${bookingDetails.sessionType} (${
-    bookingDetails.specialization
-  }) on ${bookingDetails.startDate.toDateString()} at ${
+  content: `Your Session booked on ${bookingDetails.startDate.toDateString()} at ${
     bookingDetails.startTime
-  } is confirmed. Amount: $${bookingDetails.amount}.`,
+  } is confirmed. Amount: Rs${bookingDetails.amount}.`,
   bookingId: new mongoose.Types.ObjectId(bookingDetails.sessionId),
   read: false,
   createdAt: new Date(),

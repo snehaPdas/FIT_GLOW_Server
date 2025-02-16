@@ -8,6 +8,7 @@ import { uploadToCloudinary } from "../config/clodinary";
 import { ISession } from "../interface/trainer_interface";
 import { ITrainerService } from "../interface/trainer/Trainer.service.interface";
 import { ITrainerRepository } from "../interface/trainer/Trainer.repository.interface";
+import { ITrainer } from "../interface/trainer_interface";
 
 
 class TrainerService implements ITrainerService {
@@ -523,9 +524,55 @@ class TrainerService implements ITrainerService {
       }
      }
 
+     async fetchTrainer(trainer_id: string) {
+      return await this._trainerRepository.getTrainerProfile(trainer_id)
+    }
 
 
+async updateTrainer(trainer_id: string, trainerData: Partial<ITrainer>) {
+  try {
+    const {
+      profileImage,
+      name,
+      email,
+      phone,
+      yearsOfExperience,
+      gender,
+      language,
+      dailySessionLimit,
+      about,
+      specializations
+    } = trainerData;
+
+    const existingTrainer = await this._trainerRepository.updateTrainerData(
+      trainer_id
+    );
+    if (!existingTrainer) {
+      throw new Error("Trainer not found");
+    }
+    if (profileImage) existingTrainer.profileImage = profileImage;
+    if (name) existingTrainer.name = name;
+    if (email) existingTrainer.email = email;
+    if (phone) existingTrainer.phone = phone;
+    if (yearsOfExperience)
+      existingTrainer.yearsOfExperience = yearsOfExperience;
+    if (gender) existingTrainer.gender = gender;
+    if (language) existingTrainer.language = language;
+    if (about) existingTrainer.about = about;
+    if (dailySessionLimit)
+      existingTrainer.dailySessionLimit = dailySessionLimit;
+
+    if(Array.isArray(specializations)) {
+      existingTrainer.specializations = specializations
+    }
+    await existingTrainer.save();
+    return existingTrainer;
+  } catch (error) {
+    console.error("Error in service layer:", error);
+    throw new Error("Failed to update trainer");
+  }
 }
 
+}
 
 export default TrainerService;

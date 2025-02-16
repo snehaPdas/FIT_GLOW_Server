@@ -32,4 +32,6 @@ export interface ITrainerRepository{
      getAllStatistics():Promise<any>
      dietPlan(userId:string,dietPlans:any):Promise<any>
      fetchDietPlan(userId:string):Promise<any>
+     getTrainerProfile(trainder_Id:string):Promise<any>
+     updateTrainerData(trainder_Id:string):Promise<any>
 }
