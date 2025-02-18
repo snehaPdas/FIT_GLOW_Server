@@ -1,6 +1,6 @@
 import { Document } from "mongoose";
 import { IBooking, IUser } from "../common";
-import{Interface_Trainer,IKYC,ISession,ISpecialization,ISessionDetails} from "../trainer_interface"
+import{Interface_Trainer,IKYC,ISession,ISpecialization,ISessionDetails,IWallet,IDietPlan} from "../trainer_interface"
 
 export interface ITrainerService{
     findAllSpecializations():Promise<any>
@@ -23,10 +23,10 @@ export interface ITrainerService{
     fetchUser(userId:string):Promise<IUser>
     getNotifications(trainer_id:any):Promise<any>
     clearNotifications(trainer_id:any):Promise<any>
-    getWallet(trinerId:any):Promise<any>
-    withdraw(trainer_id:any,amount:any):Promise<any>
-     getDashboardData():Promise<any>
-     dietPlan(userId:string,dietPlans:any):Promise<any>
+    getWallet(trinerId:any):Promise<IWallet|null|undefined>
+    withdraw(trainer_id:any,amount:any):Promise<IWallet|null|undefined>
+     getDashboardData():Promise<void>
+     dietPlan(userId:string,dietPlans:IDietPlan):Promise<IDietPlan|undefined>
      getDietPlan(userId:string):Promise<any>
      fetchTrainer(trainder_Id:string):Promise<any>
      updateTrainer(trainer_id:string,updatedTrainerData:any):Promise<any>

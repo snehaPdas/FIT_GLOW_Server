@@ -97,3 +97,16 @@ export interface ITrainer {
   kycStatus: 'pending' | 'approved' | 'submitted' | 'rejected';
   isBlocked?: boolean;
 }
+export interface IWallet {
+  trainerId: string;
+  balance: number;
+  transactions: any[]; 
+}
+export interface IDietPlan {
+  night: any;
+  morning: string;
+  lunch: string;
+  evening: string;
+  totalCalories: string;
+  trainerId: string;
+}

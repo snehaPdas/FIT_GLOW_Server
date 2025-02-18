@@ -1,6 +1,6 @@
-import { Interface_Trainer } from "../trainer_interface"
+import { Interface_Trainer,IWallet } from "../trainer_interface"
 import  {IOtp} from "../common"
-import { ISession } from "../trainer_interface";
+import { ISession,IDietPlan } from "../trainer_interface";
 import mongoose, { Types } from "mongoose";
 
 
@@ -27,10 +27,10 @@ export interface ITrainerRepository{
     fetchUeserDetails(userId:string):Promise<any>
     fetchNotifications(trainerId:any):Promise<any>
     deleteTrainerNotifications(trainerId:any):Promise<any>
-    fetchWalletData(trainer_id:any):Promise<any>
+    fetchWalletData(trainer_id:string):Promise<IWallet|null|undefined>
     withdrawMoney(trainer_id:any,amount:any):Promise<any>
      getAllStatistics():Promise<any>
-     dietPlan(userId:string,dietPlans:any):Promise<any>
+     dietPlan(userId:string,dietPlans:IDietPlan):Promise<IDietPlan|undefined|any>
      fetchDietPlan(userId:string):Promise<any>
      getTrainerProfile(trainder_Id:string):Promise<any>
      updateTrainerData(trainder_Id:string):Promise<any>

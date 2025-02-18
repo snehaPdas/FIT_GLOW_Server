@@ -5,7 +5,7 @@ import OtpModel from "../models/otpModel";
 import { IOtp, ITransaction } from "../interface/common";
 import mongoose, { Types } from "mongoose";
 import KYCModel from "../models/KYC_Models";
-import { ISession } from "../interface/trainer_interface";
+import { ISession,IDietPlan } from "../interface/trainer_interface";
 import SessionModel from "../models/sessionModel";
 import BookingModel from "../models/bookingModel";
 import { IBooking } from "../interface/common";
@@ -15,7 +15,7 @@ import UserModel from "../models/userModel";
 import BaseRepository from "./base/baseRepository";
 import NotificationModel from "../models/notificationModel";
 import WalletModel from "../models/walletModel";
-import { MonthlyStats } from "../interface/trainer_interface";
+import { MonthlyStats,IWallet } from "../interface/trainer_interface";
 import DietPlanModel from "../models/dietPlanModel";
 
 class TrainerRepository extends BaseRepository<any> implements  ITrainerRepository{
@@ -387,6 +387,7 @@ try {
     
     };
   });
+  
   return bookingDetails
  
 } catch (error) {
@@ -470,7 +471,7 @@ try {
     }
   }
 
-  async fetchWalletData(trainer_id: string) {
+  async fetchWalletData(trainer_id: string):Promise<IWallet|null|undefined> {
     try {
       const walletData = await this._walletModel.findOne({
         trainerId: trainer_id,
@@ -645,7 +646,7 @@ try {
         trainerWiseData
     };
 }
-async dietPlan(userId: string, dietPlans: any) {
+async dietPlan(userId: string, dietPlans: IDietPlan):Promise<IDietPlan|undefined|any> {
   try {
     if (!userId || !dietPlans.trainerId) {
       throw new Error("Missing userId or trainerId");

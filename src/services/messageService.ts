@@ -81,9 +81,9 @@ if (receiverSocketId) {
 
     return savedMessage;
 }
-///////
-////////////////
-/////////////////////////
+
+/////////////////////////////////////////////
+
 async getMessage(senderId: string, userToChatId: string) {
   const senderObjectId = new mongoose.Types.ObjectId(senderId);
   const receiverObjectId = new mongoose.Types.ObjectId(userToChatId);
@@ -110,7 +110,7 @@ console.log("senderid issssssss",senderId,userToChatId)
           ]
       }
   }).populate('messages');
-  console.log('conversatiosn', conversations);
+//   console.log('conversatiosn', conversations);
 
   const allConversations = conversations.flatMap(conversation => conversation.messages)
      console.log("all conversation is",allConversations)

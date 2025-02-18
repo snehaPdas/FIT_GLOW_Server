@@ -36,8 +36,10 @@ if (userId) {
 }
 socket.on("disconnect", () => {
     console.log(`User ${userId} disconnected`);
-    delete userSocketMap[userId];
-});
+    if (userId && userSocketMap[userId]) {
+      delete userSocketMap[userId];
+      console.log(`User with ID: ${userId} disconnected and removed from socket map`);
+    }});
 
 socket.on('sendMessage', (data) => {
     if (userId) {
@@ -143,6 +145,9 @@ socket.on('sendMessage', (data) => {
   
 
 
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });

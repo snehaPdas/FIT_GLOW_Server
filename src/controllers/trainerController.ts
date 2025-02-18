@@ -443,7 +443,7 @@ class TrainerController {
    async getDashboardData(req: Request, res: Response, next: NextFunction) {
     try {
       const response = await this._trainerService.getDashboardData()
-      console.log("@@@@@@@@@@@@@@@@@",response)
+      
       res.status(200).json({data: response})
     } catch (error) {
       next(error)
@@ -458,10 +458,7 @@ class TrainerController {
 try {
   const {userId}=req.params
   const dietPlans=req.body
-  
-  console.log("dietplan ssssssssssss",dietPlans)
-  console.log("trainerssssssssssss",dietPlans.trainerId)
-  console.log("trainerssssssssssss",userId)
+  console.log("dietPlans",dietPlans)
  const response=await this._trainerService.dietPlan(userId,dietPlans)
  res.status(201).json({ message: "Diet Plan added successfully", dietPlan: response });
 

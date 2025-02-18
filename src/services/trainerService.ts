@@ -8,7 +8,7 @@ import { uploadToCloudinary } from "../config/clodinary";
 import { ISession } from "../interface/trainer_interface";
 import { ITrainerService } from "../interface/trainer/Trainer.service.interface";
 import { ITrainerRepository } from "../interface/trainer/Trainer.repository.interface";
-import { ITrainer } from "../interface/trainer_interface";
+import { ITrainer,IDietPlan } from "../interface/trainer_interface";
 
 
 class TrainerService implements ITrainerService {
@@ -506,7 +506,7 @@ class TrainerService implements ITrainerService {
       }
     }
 
-    async dietPlan(userId:string,dietPlans:any){
+    async dietPlan(userId:string,dietPlans:IDietPlan):Promise<IDietPlan|undefined>{
       try {
         return await this._trainerRepository.dietPlan(userId,dietPlans)
 

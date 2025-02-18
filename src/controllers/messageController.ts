@@ -10,7 +10,9 @@ import TrainerModel from "../models/trainerModel";
 
 
 class MessageController {
+
   async _sendMessage(req: Request, res: Response) {
+    console.log("forcheckingmsg")
     try {
       const { token, receiverId, message } = req.body;
  console.log('server', token,'---------', receiverId,"message iss",message);
@@ -46,7 +48,7 @@ class MessageController {
     //////////////////////////////////////////////////////////////////
     async getMessage(req: Request, res: Response) {
       try {
-        // console.log('get message');
+         console.log('get message');
         
         const {token, id} = req.params
         // console.log(token,'==========', id);
