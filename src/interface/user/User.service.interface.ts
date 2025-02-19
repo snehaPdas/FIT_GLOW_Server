@@ -25,6 +25,10 @@ export interface IUserService{
     getNotifications(user_id:any):Promise<any>
     clearNotifications(user_id:any):Promise<any>
     getDietPlan(trainerId:string,userId:string):Promise<any>
+    cancelAndRefund(sessionId:string,userId:string,trainerId:string):Promise<any>
+    findBookings(user_id:string,trainer_id:string):Promise<any>
+    addReview(reviewComment:any,selectedRating:any,userId:any,trainerId:any):Promise<any>
+    getReivewSummary(trainer_id:string):Promise<any>
 
 
 }

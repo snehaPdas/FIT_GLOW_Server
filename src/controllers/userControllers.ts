@@ -279,6 +279,7 @@ async checkoutPayment(req: Request, res: Response, next: NextFunction){
 }
 
 async createBooking(req: Request, res: Response, next: NextFunction){
+  console.log("NNNNNNN")
   try {
    
     const { sessionId, userId , stripe_session_id} = req.body;
@@ -378,6 +379,67 @@ async getDietPlan(req: Request, res: Response, next: NextFunction){
 
 }
 
+async cancelSession(req: Request, res: Response, next: NextFunction){
+  console.log("reached in cancelsession")
+  try {
+       
+    const { sessionId, userId , trainerId} = req.body;
+    console.log("sessssssssssssss",sessionId,userId,trainerId)
+    const cancelAndRefund = await this._userService.cancelAndRefund(sessionId,userId,trainerId);
+    res.status(HTTP_statusCode.OK).json(cancelAndRefund)
+  } catch (error) {
+    console.log("Error in camncel session",error)
+  }
+
+}
+
+
+async findbookings(req: Request, res: Response, next: NextFunction) {
+  console.log("yes reached in findbookingggggg")
+  try {
+    const { user_id, trainer_id } = req.params;
+    const bookingStatus = await this._userService.findBookings(
+      user_id,
+      trainer_id
+    );
+    console.log("hhhhhh",bookingStatus)
+
+    res.status(200).json(bookingStatus);
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+async addReview(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { reviewComment, selectedRating, userId, trainerId } = req.body;
+    const response = await this._userService.addReview(
+      reviewComment,
+      selectedRating,
+      userId,
+      trainerId
+    );
+    console.log(response);
+    let reviewId = response._id;
+    res
+      .status(200)
+      .json({ message: "Review created successfully", reviewId });
+  } catch (error) {
+    next(error);
+  }
+}
+async getReivewSummary(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { trainer_id } = req.params;
+    const reviewsAndAvgRating = await this._userService.getReivewSummary(
+      trainer_id
+    );
+    res.status(200).json(reviewsAndAvgRating);
+  } catch (error) {
+    next(error);
+  }
+}
 
 }
 

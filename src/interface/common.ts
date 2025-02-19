@@ -52,6 +52,7 @@ export interface IUser {
   updatedAt: Date; 
   payment_intent?: string;
   dietPlan?: string,
+  
 
   }
 
@@ -72,4 +73,11 @@ export interface IUser {
     transactionType: 'credit' | 'debit';
     date?: Date;                
     bookingId?: string;         
+}
+
+export  interface IReview {
+  userId: mongoose.Types.ObjectId
+  trainerId: mongoose.Types.ObjectId
+  rating: number
+  comment: string
 }

@@ -14,7 +14,10 @@ import NotificationModel from "../models/notificationModel";
 import WalletModel from "../models/walletModel";
 import { ITransaction } from "../models/walletModel";
 import DietPlanModel from "../models/dietPlanModel";
+import ReviewModel from "../models/reviewModel";
+
 class UserRepository extends BaseRepository<any>  implements IUserRepository  {
+  
   deleteOtpByEmail(useremail: string) {
     throw new Error("Method not implemented.");
   }
@@ -27,6 +30,7 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
   private _notificationModel=NotificationModel
   private _walletModel=WalletModel
   private _dietPlanModel=DietPlanModel
+  private _reviewModel=ReviewModel
 
 
   constructor() {
@@ -166,7 +170,7 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
     try {
       const schedules = await this._sessionModel.find({}).populate('specializationId')
       return schedules;
-    } catch (error) {}
+    } catch (error) {console.log("Error",error)}
   }
   async getTrainer(trainerId: string) {
     try {
@@ -200,21 +204,44 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
   console.log("response of payment is ",response)
   return response
 }
-async findExistingBooking(bookingDetails:IBooking){
+async findExistingBooking(bookingDetails: IBooking) {
   try {
-    const existinBooking= await this._bookingModel.findOne({sessionId: bookingDetails.sessionId,
-      userId: bookingDetails.userId})
-      await this._sessionModel.findByIdAndUpdate(
-        { _id: bookingDetails.sessionId },
-        { isBooked: true },
-        { new: true }
-      );
-      return existinBooking
+    // Find existing booking for the same session and user
+    const existingBooking = await this._bookingModel.findOne({
+      sessionId: bookingDetails.sessionId,
+      userId: bookingDetails.userId,
+    });
+
+    if (existingBooking) {
+      console.log("Booking already exists.");
+
+      // If the existing booking was cancelled, only update the status
+      if (existingBooking.paymentStatus === "Cancelled") {
+        await this._bookingModel.updateOne(
+          { _id: existingBooking._id },
+          { $set: { paymentStatus: "Confirmed" ,} }
+        );
+        await this._sessionModel.updateMany({_id:existingBooking.sessionId},{$set:{isBooked:true}})
+        return { ...existingBooking.toObject(), paymentStatus: "Confirmed" };
+      }
+
+      return existingBooking;
+    }
+
+    // If no existing booking, mark the session as booked
+    await this._sessionModel.findByIdAndUpdate(
+      bookingDetails.sessionId,
+      { isBooked: true },
+      { new: true }
+    );
+
+    return null; // No existing booking, proceed with new booking
   } catch (error) {
-    console.log("Error in existing booking repository",error)
-    
+    console.log("Error in existing booking repository", error);
+    return null;
   }
 }
+
 
 async createBooking(bookingDetails:IBooking){   
   try {
@@ -413,6 +440,121 @@ async fetchDietPlan(trainderId:string,userId:string){
   }
 
 }
+async cancelAndRefund(bookId:string,userId:string,trainerId:string){
+  console.log("LL")
+
+  try {
+  const bookingDetails=  await this._bookingModel.findOne({_id:bookId, trainerId:trainerId, userId:userId})
+
+  if(bookingDetails?.paymentStatus==="Cancelled"){
+    throw new Error('session is already cancelled');
+}
+  if(bookingDetails?.paymentStatus==="Confirmed"){
+    bookingDetails.paymentStatus="Cancelled"
+    await bookingDetails.save()
+     await this._sessionModel.updateOne(
+        { _id: bookingDetails.sessionId }, 
+        { $set: { status: "Cancelled", isBooked: false } }
+      );
+      const wallet = await this._walletModel.findOne({ trainerId });
+
+      if (wallet) {
+        const refundAmount = 0.9 * (bookingDetails.amount??0); // Deduct the 90% credited amount
+
+        // Ensure balance is not negative after refund
+        if (wallet.balance >= refundAmount) {
+          wallet.balance -= refundAmount;
+        } else {
+          wallet.balance = 0;
+        }
+
+        // Add transaction record for refund
+        const refundTransaction: ITransaction = {
+          amount: -refundAmount,
+          transactionId: "txn_refund_" + Date.now() + Math.floor(Math.random() * 10000),
+          transactionType: "debit",
+          bookingId: bookId,
+          date: new Date(),
+        };
+
+        wallet.transactions.push(refundTransaction);
+        await wallet.save();
+      }
+
+
+    }
+        
+return bookingDetails
+  
+  
+  } catch (error) {
+    console.log("cancel booking details",error)
+    
+  }
+}
+async findBookings(user_id: string, trainer_id: string) {
+  try {
+    const bookingData = await this._bookingModel.findOne({
+      userId: user_id,
+      trainerId: trainer_id,
+      paymentStatus: "Confirmed",
+    });
+
+    return bookingData;
+  } catch (error) {
+    throw new Error("Failed to find bookings");
+  }
+}
+
+async createReview(
+  reviewComment: string,
+  selectedRating: number,
+  userId: string,
+  trainerId: string
+) {
+  try {
+    const data = {
+      userId: new mongoose.Types.ObjectId(userId),
+      trainerId: new mongoose.Types.ObjectId(trainerId),
+      rating: selectedRating,
+      comment: reviewComment,
+    };
+    const addReview = await this._reviewModel.create(data);
+    return addReview;
+  } catch (error) {
+    console.error("Error creating review:", error);
+    throw new Error("Failed to create review");
+  }
+}
+async getAvgReviewsRating(trainer_id: string) {
+  try {
+    const avgRatingAndReivews = await this._reviewModel.aggregate([
+      {
+        $match: { trainerId: new mongoose.Types.ObjectId(trainer_id) }, // Match reviews for the specific trainer
+      },
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: "$rating" },
+          totalReviews: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          averageRating: { $floor: "$averageRating" },
+          totalReviews: 1,
+        },
+      },
+    ]);
+
+    return avgRatingAndReivews;
+  } catch (error) {
+    console.error("Error finding review avg summary:", error);
+    throw new Error("Failed to find review avg summary");
+  }
+}
+
 
 }
 

@@ -33,5 +33,10 @@ export interface IUserRepository{
     fetchNotifications(userId:string):Promise<any>
     deleteUserNotifications(userId:string):Promise<any>
     fetchDietPlan(trainerId:string,userId:string):Promise<any>
+    cancelAndRefund(bookId:string,userId:string,trainerId:string):Promise<any>
+    findBookings(user_id:string,trainerId:string):Promise<any>
+    createReview(reviewComment:any,selectedRating:any,userId:any,trainerId:any):Promise<any>
+    getAvgReviewsRating(trainer_id:string):Promise<any>
+
 }
 

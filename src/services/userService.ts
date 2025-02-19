@@ -394,8 +394,10 @@ try {
   }
 
   async findBookingDetails(session_id: string, user_id: string, stripe_session_id: string) {
+    console.log("mmmmmmm")
     try {
       const session = await this._userRepository.findSessionDetails(session_id);
+      console.log("mmmmmmm,session",session)
 
       if (session) {
         session.status = "Confirmed";
@@ -414,26 +416,28 @@ try {
         throw new Error("Trainer not found.");
       }
        const bookingDetails: IBooking = {
-        sessionId: new mongoose.Types.ObjectId(session._id),
-        trainerId: new mongoose.Types.ObjectId(trainer[0]._id),
-        userId: new mongoose.Types.ObjectId(user_id),
-       // specialization: session.specializationId.name,
-        sessionType: session.type ,
-        bookingDate: new Date(),
-        startDate: session.selectedDate || session.startDate,
-        endDate: session.endDate,
-        startTime: session.startTime,
-        endTime: session.endTime,
-        amount: session.price,
-        paymentStatus: "Confirmed",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        payment_intent: sessionData.payment_intent ? sessionData.payment_intent.toString() : undefined
-      };
+         sessionId: new mongoose.Types.ObjectId(session._id),
+         trainerId: new mongoose.Types.ObjectId(trainer[0]._id),
+         userId: new mongoose.Types.ObjectId(user_id),
+         // specialization: session.specializationId.name,
+         sessionType: session.type,
+         bookingDate: new Date(),
+         startDate: session.selectedDate || session.startDate,
+         endDate: session.endDate,
+         startTime: session.startTime,
+         endTime: session.endTime,
+         amount: session.price,
+         paymentStatus: "Confirmed",
+         createdAt: new Date(),
+         updatedAt: new Date(),
+         payment_intent: sessionData.payment_intent ? sessionData.payment_intent.toString() : undefined,
+         
+       };
       const existingBooking = await this._userRepository.findExistingBooking(bookingDetails);
       if (existingBooking) {
         console.log("Booking already exists.");
-        throw new Error("Booking already exists.");
+        return existingBooking
+       // throw new Error("Booking already exists.");
       }
       const bookingData=await this._userRepository.createBooking(bookingDetails)
       await this._userRepository.createNotification(bookingData)
@@ -507,6 +511,59 @@ try {
     }
 
    }
+   async cancelAndRefund(bookId:string,userId:string,trainerId:string){
+    
+    try {
+      const bookedsession=await this._userRepository.cancelAndRefund(bookId,userId,trainerId)
+      
+
+      //refund all amount into user account
+      const refund = await stripeClient.refunds.create({
+        payment_intent:   bookedsession.payment_intent,
+        amount: bookedsession.Amount
+      });
+      if (refund.status === 'succeeded') {
+        return {
+          success: true,
+          message: 'Refund processed successfully',
+        };
+      } else {
+        throw new Error('Refund processing failed');
+      }
+   
+  
+    } catch (error) {
+      console.log("Error cancel and refund",error)
+    }
+
+   }
+   async findBookings(user_id: string, trainerId: string) {
+    try {
+      const bookingData = await this._userRepository.findBookings(user_id, trainerId)
+      console.log("ccccccccc",bookingData.paymentStatus)
+      return bookingData?.paymentStatus
+    } catch (error) {
+      throw new Error('failed to find booking') 
+    }
+   }
+   
+  async addReview(reviewComment: string, selectedRating: number, userId: string, trainerId: string) {
+    try {
+      return await this._userRepository.createReview(reviewComment, selectedRating, userId, trainerId)
+    } catch (error) {
+      throw new Error('Failed to create review');
+    }
+  }
+  async getReivewSummary(trainer_id: string) {
+    try {      
+      const avgReviewsRating = await this._userRepository.getAvgReviewsRating(trainer_id)
+      return avgReviewsRating
+    } catch (error) {
+      throw new Error('failed to find review summary')   
+    }
+  }
+ 
+  
 }
 
 export default UserService;

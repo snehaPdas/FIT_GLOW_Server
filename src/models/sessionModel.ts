@@ -14,7 +14,7 @@ const sessionSchema=new Schema<ISession>({
     isBooked: { type: Boolean, default: false },
     status: {
         type: String,
-        enum: ["Pending", "Confirmed", "Completed", "Cancelled", "InProgress"],
+        enum: ["Pending", "Confirmed", "Completed", "Cancelled" ,"InProgress"],
         default: "Pending",
         
     },

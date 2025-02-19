@@ -42,9 +42,14 @@ const userControllerInstance = new UserController(userServiceInstance);
 
  router.get('/dietplan/:trainerId/:userId', authMiddlewares(['user']), userControllerInstance.getDietPlan.bind(userControllerInstance));
 
+ router.post("/cancel-session",authMiddlewares(['user']),userControllerInstance.cancelSession.bind(userControllerInstance))
+
+ router.get('/bookings/:user_id/:trainer_id', authMiddlewares(['user']), userControllerInstance.findbookings.bind(userControllerInstance));
 
 
+ router.post('/review', authMiddlewares(['user']), userControllerInstance.addReview.bind(userControllerInstance));
 
+ router.get('/reviews-summary/:trainer_id', authMiddlewares(['user']), userControllerInstance.getReivewSummary.bind(userControllerInstance)); 
 
 
 console.log('hit routr');
