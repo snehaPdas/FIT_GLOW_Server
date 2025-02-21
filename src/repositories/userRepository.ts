@@ -131,8 +131,8 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
     }
   }
   async saveResetPassword(email: string, hashedPassword: string) {
-    console.log("hee", email);
-    console.log("reset reached in repos", hashedPassword);
+    
+    
     try {
       const user = await this._userModel.findOne({ email });
       if (!user) {
@@ -155,7 +155,7 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
     }
   }
   async getAllTrainers():Promise<Interface_Trainer[]|undefined>{
-    console.log("ïn repo")
+    
     try{
     const trainers=await this._trainerModel.find({}).populate("specializations","name")
     
@@ -185,11 +185,11 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
 
 
    userIsBlocked = async (user_id: string): Promise<boolean> => {
-        console.log("user id got in repo",user_id)
+        
     try {
       
       const userDetails= await this._userModel.findById( user_id);
-      console.log("userDetails are",userDetails)
+      
       if (userDetails?.isBlocked === true) {
         return true;
       };
@@ -199,9 +199,9 @@ class UserRepository extends BaseRepository<any>  implements IUserRepository  {
     }
   }
   async findSessionDetails(sessionID: string) {
-    console.log("seesion is",sessionID)
+    
   const response=await this._sessionModel.findById(sessionID).populate<{specializationId:ISpecialization}>("specializationId")
-  console.log("response of payment is ",response)
+  
   return response
 }
 async findExistingBooking(bookingDetails: IBooking) {
@@ -289,7 +289,7 @@ async createBooking(bookingDetails:IBooking){
 }
 
 async createNotification(bookingDetails: IBooking){
-  console.log("booking details for notifivcation check>>>>>>>>>.",bookingDetails)
+  
 try{
   if (!bookingDetails.trainerId || !bookingDetails.userId) {
     throw new Error("Trainer ID or User ID is missing.");
@@ -383,7 +383,7 @@ async editUserData(userId:string,userData:User){
 }
 async getBookedsessionData(userId:string){
   try {
-    console.log("üser is in repo",userId)
+    
 
     const bookings=await this._bookingModel.find({userId:userId}).populate("trainerId","name profileImage").exec()
     const response = bookings.map((booking: any) => {
@@ -393,7 +393,7 @@ async getBookedsessionData(userId:string){
         profileImage:booking.trainerId ? booking.trainerId.profileImage:"Trainer not found"
       };
     });
-    console.log("response isssssssss",response)
+  
 
     return response
 
@@ -441,7 +441,7 @@ async fetchDietPlan(trainderId:string,userId:string){
 
 }
 async cancelAndRefund(bookId:string,userId:string,trainerId:string){
-  console.log("LL")
+  
 
   try {
   const bookingDetails=  await this._bookingModel.findOne({_id:bookId, trainerId:trainerId, userId:userId})
@@ -512,6 +512,7 @@ async createReview(
   userId: string,
   trainerId: string
 ) {
+  
   try {
     const data = {
       userId: new mongoose.Types.ObjectId(userId),
@@ -530,7 +531,7 @@ async getAvgReviewsRating(trainer_id: string) {
   try {
     const avgRatingAndReivews = await this._reviewModel.aggregate([
       {
-        $match: { trainerId: new mongoose.Types.ObjectId(trainer_id) }, // Match reviews for the specific trainer
+        $match: { trainerId: new mongoose.Types.ObjectId(trainer_id) }, 
       },
       {
         $group: {
@@ -552,6 +553,29 @@ async getAvgReviewsRating(trainer_id: string) {
   } catch (error) {
     console.error("Error finding review avg summary:", error);
     throw new Error("Failed to find review avg summary");
+  }
+}
+async getReview(trainer_id: string) {
+  
+  try {
+    const reviews = await this._reviewModel
+      .find({ trainerId: trainer_id }) // Find reviews by trainerId
+      .populate({
+        path: "userId", 
+        select: "name image",
+      })
+      .sort({ createdAt: -1 }); 
+      
+      {
+      }
+        
+
+console.log("Trainer ID Type:", typeof trainer_id);
+console.log("Is Valid ObjectId?", mongoose.Types.ObjectId.isValid(trainer_id));
+
+    return reviews;
+  } catch (error) {
+    throw new Error("Failed to find review");
   }
 }
 

@@ -20,7 +20,7 @@ class TrainerController {
         try {
       
             const specializationsData =  await this._trainerService.findAllSpecializations();
-            console.log("specialisationdaTA",specializationsData)
+            
             res.status(HTTP_statusCode.OK).json({ success: true, data: specializationsData });
           } catch (error) {
             console.error(
@@ -34,13 +34,13 @@ class TrainerController {
     async registerTrainer(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
           const trainerData: Interface_Trainer = req.body;
-           console.log("datass",trainerData)
+           
           const trainer = await this._trainerService.registerTrainer(trainerData);
     
           res.status(HTTP_statusCode.OK).json({ message: "OTP sent to email" });
           
         } catch (error) {
-          console.error("Error in registerTrainer:", error);
+          console.error("Error in registerTrainer:", error)
           if ((error as Error).message === "Email already exists") {
             res.status(HTTP_statusCode.Conflict).json({ message: "Email already exists" });
             return;
@@ -76,7 +76,7 @@ class TrainerController {
         res: Response, next: NextFunction): Promise<void> {
         try {
           const { email } = req.body;
-          // console.log(email,'trainer cont');
+      
     
           await this._trainerService.resendOTP(email);
           res.status(HTTP_statusCode.OK).json({ message: "OTP resent successfully" });
@@ -92,11 +92,11 @@ class TrainerController {
     
 
       async verifyForgotOtp(req: Request, res: Response, next: NextFunction) {
-        console.log("verify otp controller");
+        
         try {
-           console.log("verify otp controller");
+           
           const { userData, otp } = req.body;
-           console.log("*************",otp,userData)
+           
           await this._trainerService.verifyForgotOTP(userData, otp);
     
           res
@@ -119,7 +119,7 @@ class TrainerController {
 
       async loginTrainer(req: Request, res: Response, next: NextFunction){
         try {
-          console.log("-----reached here")
+        
           const {email,password}=req.body
    let user=await this._trainerService.LoginTrainer(email,password)
     
@@ -156,7 +156,7 @@ class TrainerController {
 
       async refreshToken(req:Request,res:Response,next:NextFunction){
         const refresh_token=req.cookies?.refreshToken
-        console.log("ït is in cookies.//././/./",refresh_token)
+      
         if(!refresh_token){
           res.status(HTTP_statusCode.NoAccess).json({message:"Refresh Token Not found"})
           return 
@@ -176,9 +176,9 @@ class TrainerController {
         async forgotpassword(req:Request,res:Response,next:NextFunction):Promise<any>{
           try {
             const {emailData}=req.body
-            console.log("got email from body",emailData)
+            
             const response=await this._trainerService.forgotpassword(emailData)
-            console.log("noll",response)
+            
             if(!response){
               return res.status(HTTP_statusCode.BadRequest).json({message:"email not found"})
         
@@ -194,9 +194,9 @@ class TrainerController {
         async resetPassword(req:Request,res:Response,next:NextFunction):Promise<any>{
           try {
              const{userData,payload}=req.body
-             console.log("*$*$*$*$",userData)
+             
              const result=await this._trainerService.resetapassword(userData,payload)
-             console.log("what is the response got?",result)
+             
              if(result?.modifiedCount===1){
               return res.status(HTTP_statusCode.OK).json({ message: "Password reset successfully" });
         
@@ -208,7 +208,7 @@ class TrainerController {
           } catch (error) {
             console.log("User Controller Error",error)
             next(error)
-            // return res.status(500).json({ message: "Server Error" });
+          
 
         
           }
@@ -222,15 +222,15 @@ class TrainerController {
             const files = req.files as { [fieldname: string]: Express.Multer.File[] };
         
             const formData = {
-              // trainer_id,
-              // specialization,
+          
+              
               name,
               email,
               phone,
               trainer_id
             };
-             console.log("------------>>>>",formData)
-             console.log("---->>>-------->>>>",files)
+            
+             
 
 
             // Pass formData and uploaded files to the service for KYC submission
@@ -260,7 +260,7 @@ class TrainerController {
         
           try {
             const trainerId=req.params.trainerId
-            console.log("trainer id for specialization",trainerId)
+            
             const specialisations=await this ._trainerService.getSpecialization(trainerId)
             
              res.status(HTTP_statusCode.OK).json({message:"specialisation fetched successfully",data:specialisations})
@@ -273,7 +273,7 @@ class TrainerController {
         }
 
           async storeSessionData(req:Request,res:Response,next:NextFunction){
-            console.log("reached in session place")
+            
             try{
 
               const {selectedDate,startTime,endTime,startDate,endDate,specialization,price,type,status} =req.body
@@ -335,7 +335,7 @@ class TrainerController {
             const sheduleData = await this._trainerService.getSessionShedules(
               trainer_id
             );
-            console.log('sheduleData',sheduleData);
+            
       
             res
               .status(HTTP_statusCode.OK)
@@ -348,10 +348,10 @@ class TrainerController {
 
         async fetchbookingDetails(req: Request, res: Response, next: NextFunction){
           try {
-            console.log("reached booking details controller")
+            
             const trainer_id = req.params.trainerId;
             const bookingDetails=await this._trainerService.fetchBookingDetails(trainer_id)
-            console.log("controller checkinggg",bookingDetails)
+            
             res.status(HTTP_statusCode.OK).json({data:bookingDetails})
           } catch (error) {
             console.error("Error fetching booking details:", error);
@@ -364,11 +364,11 @@ class TrainerController {
 
         async editStoreSessionData(req: Request, res: Response, next: NextFunction){
           try{
-          console.log("reacheddddd edit store sessionnnn")
+          
           const sessionId = req.params.sessionId;
           const sessionData=req.body
-          console.log("---------------sessionData",sessionData)
-          console.log("---------------trainer",sessionId )
+        
+          
           const response=this._trainerService.editStoreSessionData(sessionId,sessionData)
           res.status(HTTP_statusCode.OK).json({message:"updated successfully",data:response})
           }catch(error){
@@ -453,12 +453,12 @@ class TrainerController {
   } 
   async dietPlan(req: Request, res: Response, next: NextFunction){
     
-    console.log("Incoming request body:", req.body); 
+    
 
 try {
   const {userId}=req.params
   const dietPlans=req.body
-  console.log("dietPlans",dietPlans)
+  
  const response=await this._trainerService.dietPlan(userId,dietPlans)
  res.status(201).json({ message: "Diet Plan added successfully", dietPlan: response });
 
@@ -469,7 +469,7 @@ try {
 
 
   async getDietPlan(req: Request, res: Response, next: NextFunction) {
-    console.log("&&&&&&&&&&&????????")
+    
     try {
       const { userId } = req.params;
       const dietplandetails = await this._trainerService.getDietPlan(userId);

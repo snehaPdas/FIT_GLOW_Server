@@ -65,16 +65,15 @@ class MessageService {
         conversationId: existingConversation._id,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const savedMessage: any = await newMessage.save();
 
    existingConversation.messages.push(savedMessage);
     await existingConversation.save();
     
-    // Get the receiver's socket ID
 const receiverSocketId = getReceiverSocketId(receiverId); 
 
-// console.log('receiverSocketId?????????????',receiverSocketId);
+
 if (receiverSocketId) {
     io.to(receiverSocketId).emit('newMessage', newMessage);
 }
@@ -82,13 +81,13 @@ if (receiverSocketId) {
     return savedMessage;
 }
 
-/////////////////////////////////////////////
+
 
 async getMessage(senderId: string, userToChatId: string) {
   const senderObjectId = new mongoose.Types.ObjectId(senderId);
   const receiverObjectId = new mongoose.Types.ObjectId(userToChatId);
 
-console.log("senderid issssssss",senderId,userToChatId)
+
 
   // Identify the model
   const senderModel = (await UserModel.exists({ _id: senderObjectId })) ? 'User' :
@@ -110,7 +109,7 @@ console.log("senderid issssssss",senderId,userToChatId)
           ]
       }
   }).populate('messages');
-//   console.log('conversatiosn', conversations);
+
 
   const allConversations = conversations.flatMap(conversation => conversation.messages)
      console.log("all conversation is",allConversations)

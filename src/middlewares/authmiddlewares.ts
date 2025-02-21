@@ -12,9 +12,9 @@ const authMiddleware=(roles:string[]=[])=>{
 
     
     return async ( req:CustomRequest,res:Response,next:NextFunction)=>{
-            console.log("////////////")
+            
         const token=req.header("Authorization")?.split(" ")[1]
-        console.log("token checkinhhhh",token)
+        console.log("token checking",token)
         if(!token){
             res.status(401).json({message:"Access Denied,token Missing"})
 
@@ -24,8 +24,8 @@ const authMiddleware=(roles:string[]=[])=>{
         
             const decode:any=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET as string) as CustomRequest["authData"]
             
-            //  const userId= req.authData?.id
-        //role check
+        
+        //role based checking
             if(roles.length && !roles.includes(decode.role) ){
                 res.status(403).json({message:"Access denied ,Role insuffcient "})
                 return

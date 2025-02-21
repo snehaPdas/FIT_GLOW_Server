@@ -26,10 +26,10 @@ class UserService implements IUserService {
 
   // Register user and send OTP
   async register(userData: IUser): Promise<void> {
-    console.log("in service")
+    
     try {
       const existedUser = await this._userRepository.existingUser(userData.email)
-      console.log("in service....",)
+      
 
       if (existedUser) {
         console.log("user already exist", existedUser);
@@ -173,7 +173,7 @@ class UserService implements IUserService {
   async LoginUser(email: string, password: string): Promise<any> {
     try {
       const user: IUser | null = await this._userRepository.findUser(email);
-      console.log("------>", user);
+      
       if (!user) {
         console.log("User not found");
         throw new Error("Usernotfound");
@@ -230,10 +230,7 @@ class UserService implements IUserService {
       if (id && email) {
         const role = "user";
         const userNewAccessToken = generateAccessToken({ id, email, role });
-        console.log(
-          "---->>>created new accessrtoken here check",
-          userNewAccessToken
-        );
+    
         return userNewAccessToken;
       } else {
         throw new Error("Invalid token payload structure");
@@ -263,7 +260,7 @@ class UserService implements IUserService {
   }
   async forgotpassword(UserEmail: string): Promise<any> {
     try {
-      console.log("checccc", UserEmail);
+    
 
       const userResponse = await this._userRepository.findUserEmail(UserEmail);
       if (!userResponse) {
@@ -315,7 +312,7 @@ class UserService implements IUserService {
 
   async getAllTrainers():Promise<any>{
     
-    console.log("ïn service")
+    
     try {
       const trainers=await this._userRepository.getAllTrainers()
       const validTrainers=trainers?.filter((trainer: { isBlocked: boolean; kycStatus: string; })=>trainer.isBlocked===false && trainer.kycStatus==="approved")||[]
@@ -348,7 +345,6 @@ try {
  
   const sessionData = await this._userRepository.findSessionDetails(sessionID);
 
-  console.log("sessionData is......",sessionData)
   if (!sessionData || typeof sessionData.price !== "number" ||  !(sessionData.selectedDate || sessionData.startDate) ) {
     throw new Error("Missing or invalid session data");
   }
@@ -394,10 +390,10 @@ try {
   }
 
   async findBookingDetails(session_id: string, user_id: string, stripe_session_id: string) {
-    console.log("mmmmmmm")
+    
     try {
       const session = await this._userRepository.findSessionDetails(session_id);
-      console.log("mmmmmmm,session",session)
+  
 
       if (session) {
         session.status = "Confirmed";
@@ -419,7 +415,6 @@ try {
          sessionId: new mongoose.Types.ObjectId(session._id),
          trainerId: new mongoose.Types.ObjectId(trainer[0]._id),
          userId: new mongoose.Types.ObjectId(user_id),
-         // specialization: session.specializationId.name,
          sessionType: session.type,
          bookingDate: new Date(),
          startDate: session.selectedDate || session.startDate,
@@ -540,7 +535,7 @@ try {
    async findBookings(user_id: string, trainerId: string) {
     try {
       const bookingData = await this._userRepository.findBookings(user_id, trainerId)
-      console.log("ccccccccc",bookingData.paymentStatus)
+      
       return bookingData?.paymentStatus
     } catch (error) {
       throw new Error('failed to find booking') 
@@ -560,6 +555,14 @@ try {
       return avgReviewsRating
     } catch (error) {
       throw new Error('failed to find review summary')   
+    }
+  }
+
+  async reviews(trainer_id: string) {
+    try {
+      return await this._userRepository.getReview(trainer_id)
+    } catch (error) {
+      throw new Error('failed to find review')    
     }
   }
  

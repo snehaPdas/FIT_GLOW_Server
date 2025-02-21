@@ -25,7 +25,7 @@ class TrainerService implements ITrainerService {
       async findAllSpecializations() {
         try {
         const  response=await this._trainerRepository.findAllSpecializations();
-        console.log("response gotttt",response)
+        
         return response
         } catch (error) {
           console.error("Error in service while fetching specializations:", error);
@@ -33,14 +33,14 @@ class TrainerService implements ITrainerService {
         }
       }
       async registerTrainer(trainerData: Interface_Trainer) {
-        console.log("trainer data is",trainerData)
+        
         try {
              
           if (!trainerData.email) {
             throw new Error("Email is required for registration");
           }
           const existingTrainer = await this._trainerRepository.existsTrainer(trainerData);
-          console.log("existingTrainer",existingTrainer)
+          
           if(existingTrainer){
             throw new Error("Email already exist")
           }
@@ -191,7 +191,7 @@ class TrainerService implements ITrainerService {
     
       async LoginTrainer(email:string,password:string):Promise<any>{
         try{
-          console.log("pppp")
+      
           const trainer:Interface_Trainer|null=await this._trainerRepository.findTrainer(email)
       
           if (!trainer) {
@@ -250,7 +250,7 @@ class TrainerService implements ITrainerService {
             if (id && email) {
               const role = 'trainer'
               const userNewAccessToken = generateAccessToken({ id, email,role });
-              console.log("---->>>created new accessrtoken here check",userNewAccessToken)
+              
               return userNewAccessToken;
             } else {
               throw new Error("Invalid token payload structure");
@@ -266,7 +266,7 @@ class TrainerService implements ITrainerService {
 
       async forgotpassword(UserEmail: string): Promise<any> {
         try {
-          console.log("kkkk", UserEmail);
+          
     
           const userResponse = await this._trainerRepository.findUserEmail(UserEmail);
           if (!userResponse) {
@@ -318,7 +318,7 @@ class TrainerService implements ITrainerService {
 
         async kycSubmit(formData: any, files: { [fieldname: string]: Express.Multer.File[] }): Promise<any> {
           try {
-            console.log("got....",formData)
+            
             const documents: { [key: string]: string | undefined } = {};
         
       
@@ -336,7 +336,7 @@ class TrainerService implements ITrainerService {
                 files.adhar[0].buffer,
                 "trainer_aadhaarFrontSide"
               );
-              console.log("**********>>>>",aadhaarFrontSideUrl)
+              
               documents.aadhaarFrontSideUrl = aadhaarFrontSideUrl.secure_url;
             }
         
@@ -373,8 +373,8 @@ class TrainerService implements ITrainerService {
 
 
         async kycStatus(trainerId: string) {
-          console.log("reached in service")
-          console.log("trainer id is",trainerId)
+          
+        
 
           try {
             const kycStatus = await this._trainerRepository.getTrainerStatus(trainerId)
@@ -395,7 +395,7 @@ class TrainerService implements ITrainerService {
      }
 
      async storeSessionData(sessiondata:ISession){
-      console.log("yes no problem here")
+      
       try{
         const startTimeInput = sessiondata.startTime;
         const endTimeInput = sessiondata.endTime;
@@ -441,7 +441,7 @@ class TrainerService implements ITrainerService {
     }
     async fetchBookingDetails(trainer_id:string){
       try {
-        console.log("reached trainerbooking service")
+        
         const response=await this._trainerRepository.fecthBookingDetails(trainer_id)
         return response
       } catch (error) {

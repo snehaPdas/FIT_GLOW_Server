@@ -47,7 +47,7 @@ class AdminRepository extends BaseRepository<any> implements IAdminRepository {
     async createAdmin(email:string,password:string):Promise<LoginAdmin_interface|null>{
     
        try{
-        console.log("creatil ethi");
+        
 
         let data={email,password}
         
@@ -87,7 +87,7 @@ async getAllSpecializations():Promise<ISpecialization[]|undefined|null> {
 
   async saveupdatespecialization(name:string,description:string,specializationId:string,imageUrl:string){
     try{
-     console.log("inew image url reached repo",imageUrl)
+     
      let image=imageUrl
     const updatedSpecialization=await this._specializationModel.findByIdAndUpdate(specializationId,{name,description,image},{new:true})
     return updatedSpecialization
@@ -107,10 +107,10 @@ async blockUnblockUser(user_id:string,userState:boolean):Promise<IUser|undefined
 
 }
 async fetchKycData(trainerId:string):Promise<IKYC|undefined|null>{
-    console.log("here alsooooooo")
+    
     try {
         const kycData=await this._kycModel.findOne({trainerId}).populate("specializationId").populate("trainerId")
-        console.log("final reached///////",kycData)
+        
         return kycData
     } catch (error) {
         console.error('Error fetching KYC data:', error);
@@ -149,7 +149,7 @@ async getAllTrainersKycDatas():Promise<any> {
 
   async deleteKyc(trainer_id: string) {
     try {
-      console.log('-------------------------->',trainer_id);
+    
       
       const result = await this._kycModel.findOneAndDelete({ trainerId: trainer_id });
       if (result) {
@@ -164,7 +164,7 @@ async getAllTrainersKycDatas():Promise<any> {
 
   async updateKycStatus(status: string, trainer_id: string, rejectionReason: string | null): Promise<any> {
     try {
-      console.log('update kyc status repo', rejectionReason);
+      
       
       const updatedTrainer = await this._trainerModel.findByIdAndUpdate(
         trainer_id,
@@ -173,7 +173,7 @@ async getAllTrainersKycDatas():Promise<any> {
       );
   
       if (updatedTrainer) {
-        console.log('Trainer KYC status updated successfully:', updatedTrainer);
+      
   
         const updatedKyc = await this._kycModel.findOneAndUpdate(
           { trainerId: trainer_id },

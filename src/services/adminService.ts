@@ -1,5 +1,3 @@
-// import AdminRepository from "../repositories/adminRepository";
-// import UserRepository from "../repositories/userRepository";
 
  
 
@@ -12,9 +10,9 @@ import dotenv from "dotenv";
 import sendMail from "../config/email_config";
 import { kyTemplate } from "../config/kyTemplate";
 import { IAdminService } from "../interface/admin/Admin.service.interface";
-// import { IUser } from "../interface/common";
+
 import { IAdminRepository } from "../interface/admin/Admin.repository.interface";
-//import {AdminLoginResponse,} from "../interface/admin_interface"
+
 import { IUser } from "../interface/common"
 import {ISpecialization} from "../interface/trainer_interface"
 
@@ -38,7 +36,7 @@ class AdminService implements IAdminService {
         let adminData: any = await this._adminRepository.findAdmin(email);
 
         if (!adminData) {
-          console.log("Admin does not exist, creating admin...");
+          
           adminData = await this._adminRepository.createAdmin(email, password);
         }
 
@@ -137,7 +135,7 @@ class AdminService implements IAdminService {
   
   {
     try{
-      console.log("the new image url is.......",imageUrl)
+      
       const specializationresponse =
         await this._adminRepository.saveupdatespecialization(
           name,
@@ -164,7 +162,7 @@ class AdminService implements IAdminService {
   async fetchKycData(trainerId: string):Promise<any>{
     try {
       let response = await this._adminRepository.fetchKycData(trainerId);
-      console.log("casual checking", response);
+      
       return response;
     } catch (error) {
       console.log(error);
@@ -175,7 +173,7 @@ class AdminService implements IAdminService {
     try {
       const allTrainersKycDatas =
         await this._adminRepository.getAllTrainersKycDatas();
-      // console.log('allTrainersKycDatas',allTrainersKycDatas);
+
 
       return allTrainersKycDatas;
     } catch (error) {
@@ -195,7 +193,7 @@ class AdminService implements IAdminService {
         trainer_id,
         rejectionReason
       );
-      console.log("simply checkingggg datas", updatedKyc);
+    
 
       if (status === "approved" || status === "rejected") {
         await this._adminRepository.deleteKyc(trainer_id);

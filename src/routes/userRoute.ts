@@ -51,6 +51,7 @@ const userControllerInstance = new UserController(userServiceInstance);
 
  router.get('/reviews-summary/:trainer_id', authMiddlewares(['user']), userControllerInstance.getReivewSummary.bind(userControllerInstance)); 
 
+ router.get('/reviews/:trainer_id', authMiddlewares(['user']), userControllerInstance.getReivew.bind(userControllerInstance));
 
 console.log('hit routr');
 

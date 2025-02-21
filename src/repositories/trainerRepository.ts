@@ -89,7 +89,7 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
   }
   async createNewUser(trainerData: Interface_Trainer): Promise<any> {
     try {
-      console.log("trainer data have reached in repository",trainerData)
+      
       if (!trainerData.email) {
         throw new Error("Email is required");
       }
@@ -99,7 +99,7 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
       }
 
       let specializationIds: Types.ObjectId[] = [];
-      console.log("Specializations before processing:", trainerData.specializations);
+      
 
     if (trainerData.specializations && trainerData.specializations.length > 0) {
       
@@ -180,7 +180,7 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
 
   async saveResetPassword(email: string, hashedPassword: string) {
   
-    console.log("reset reached in repos", hashedPassword);
+    
     try {
       const user = await this._trainerModel.findOne({ email });
       if (!user) {
@@ -212,7 +212,7 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
           throw new Error("Trainer not found for the given trainer ID");
       }
 
-      console.log("-----specializations:", trainer.specializations);     
+           
     
       const kycData = {
         trainerId: new Types.ObjectId(formData.trainer_id),
@@ -237,10 +237,10 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
 
 
   async getTrainerStatus(trainerId: string) {
-    console.log("get repository to getstatus><><><>,",trainerId)
+  
     try {
       const trainer = await this._trainerModel.findById(trainerId).select("kycStatus")
-      console.log(",,,,,,,,,,,,,,,,,,",trainer)
+    
       
 
         
@@ -248,7 +248,7 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
         throw new Error(`Trainer with ID ${trainerId} not found`);
       }
       
-      console.log("..............trainerkycstatus",trainer.kycStatus)
+
       
 
       return trainer.kycStatus;
@@ -261,7 +261,7 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
   
   async changeKycStatus(trainerId: string, profileImage: string | undefined): Promise<string | undefined> {
     try {
-      // Update the trainers profile image and KYC status
+      
       const trainerUpdate = await this._trainerModel.findByIdAndUpdate(
         trainerId,
         {
@@ -295,7 +295,7 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
         return
       }
       const specialisations=await this._trainerModel.findById(trainerid).populate("specializations")
-      console.log("specialisation sare....",specialisations?.specializations)
+      
       return specialisations
     } catch (error) {
       console.log("Error in Repository specialisation fetch",error)
@@ -376,10 +376,10 @@ class TrainerRepository extends BaseRepository<any> implements  ITrainerReposito
 
   async fecthBookingDetails(trainerId: string){
 try {
-  console.log("booking details repository",trainerId)
+  
   
   const bookingDetails=await  this._bookingModel.find({trainerId}).populate("userId","name").exec()
-  //.populate({path:"userId",select:"name email",}).exec();
+  
   const response = bookingDetails.map((booking: any) => {
     return {
       ...booking.toObject(),  
@@ -405,9 +405,9 @@ try {
         endDate:sessionData.endDate
         
       }
-      console.log("sessiondata is got in repo",sessionData)
+      
       const updateSession=await this._sessionModel.findByIdAndUpdate(sessionId,data,{new:true})
-      console.log("updated session is",updateSession)
+      
       return updateSession
     } catch (error) {
       console.log("error in editStoreSessionData repository",error)
@@ -431,14 +431,14 @@ try {
         },
       ]);
 
-      // console.log('trainerData', trainerData);
+      
       return trainerData;
     } catch (error: any) {
       throw new Error(error);
     }
   }
   async fetchUeserDetails(userId: string) {
-    // eslint-disable-next-line no-useless-catch
+    
     try {
       const userData = await UserModel.findById(userId);
       return userData;
@@ -578,7 +578,7 @@ try {
         { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
 
-    console.log("*************************", revenueByMonth);
+    
 
     // Fetch revenue by trainer
     const revenueByTrainer = await this._bookingModel.aggregate([
@@ -614,7 +614,7 @@ try {
         });
     });
 
-    console.log("Trainer-wise Data:", trainerWiseData);
+    
 
     // Map revenue data to statistics
     revenueByMonth.forEach(revenueData => {
@@ -660,9 +660,9 @@ async dietPlan(userId: string, dietPlans: IDietPlan):Promise<IDietPlan|undefined
       const updatedPlan = await this._dietPlanModel.findOneAndUpdate(
         { userId },
         { $set: dietPlans },
-        { new: true } // Return updated document
+        { new: true } 
       );
-      console.log("Diet Plan updated successfully:", updatedPlan);
+      
       return updatedPlan;
     } else {
       // Create a new diet plan if none exists

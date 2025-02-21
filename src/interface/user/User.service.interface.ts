@@ -29,6 +29,7 @@ export interface IUserService{
     findBookings(user_id:string,trainer_id:string):Promise<any>
     addReview(reviewComment:any,selectedRating:any,userId:any,trainerId:any):Promise<any>
     getReivewSummary(trainer_id:string):Promise<any>
+    reviews(trainer_id:string):Promise<any>
 
 
 }

@@ -12,10 +12,10 @@ import TrainerModel from "../models/trainerModel";
 class MessageController {
 
   async _sendMessage(req: Request, res: Response) {
-    console.log("forcheckingmsg")
+    
     try {
       const { token, receiverId, message } = req.body;
- console.log('server', token,'---------', receiverId,"message iss",message);
+ 
 
       if (!token) {
         res.status(400).json({ error: "Token is required" });
@@ -38,20 +38,20 @@ class MessageController {
         res.status(200).json([]);
         return;
       }
-      console.log("send message issssssss",sendMessage)
+    
       res.status(200).json(sendMessage);
     } catch (error) {
       console.log("Error in sendMessage controller", error);
       res.status(500).json({ error: "Internal server error" });
     }
   }
-    //////////////////////////////////////////////////////////////////
+
     async getMessage(req: Request, res: Response) {
       try {
-         console.log('get message');
+         
         
         const {token, id} = req.params
-        // console.log(token,'==========', id);
+        
         
         const decoded = jwt.verify(
           token,  
@@ -64,7 +64,7 @@ class MessageController {
           senderId,
           id
         );
-        console.log("Fetched Messages:", getMessages);
+        
 
         res.status(200).json(getMessages);
       } catch (error) {

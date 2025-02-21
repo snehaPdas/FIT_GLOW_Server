@@ -50,13 +50,9 @@ class AdminController {
        
         
        } 
-      // else{
-      //   res.status(HTTP_statusCode.Unauthorized).json({
-      //     message: "Invalid credentials. Login failed.",
-      //   });
-      // }
       
-    } catch (error:any) {//avoid
+      
+    } catch (error:any) {
       console.log("admin loggin controller Error", error);
     next(error);
         }
@@ -80,7 +76,7 @@ class AdminController {
         { accessToken: newAccessToken }
       );
 
-      // console.log('new token', AdminNewAccessToken);
+    
 
       res.status(HTTP_statusCode.OK).json({ accessToken: newAccessToken });
     } catch (error) {
@@ -94,7 +90,7 @@ class AdminController {
       const allUsers = await this._adminService.getAllUsers();
       res
         .status(HTTP_statusCode.OK)
-        //.json({ message: "Fetch All users successfully", users: allUsers });
+        
         .json(responseHelper.successResponse("Fetch All users successfully",{users:allUsers}))
     } catch (error) {
       console.log(error);
@@ -129,7 +125,7 @@ class AdminController {
       const allSpecializations = await this._adminService.getAllSpecializations();
 
       res.status(HTTP_statusCode.OK)
-      //.json(allSpecializations);
+      
       .json(responseHelper.successResponse("fetch specialization successfully",allSpecializations))
     } catch (error) {
       console.error('Error fetching specializations:', error);
@@ -140,9 +136,7 @@ class AdminController {
   async updatespecialisation(req: Request, res: Response, next: NextFunction){
     
        try {
-        console.log("Request Body: ", req.body);
-        console.log("Uploaded File: ", req.file); 
-        
+       
       
         const {name,description}=req.body
           const specializationId=req.params.id
@@ -153,13 +147,13 @@ class AdminController {
           if (imageFile) {
             const result:any = await uploadToCloudinary(imageFile.buffer, 'specializationImages');
             imageUrl = result.secure_url;
-            console.log("Uploaded Image URL: ", imageUrl);
+            
 
           }
           
 
         const response= await this._adminService.updatespecialisation(name,description,specializationId,imageUrl)
-     // const specialization={name: response?.name,description: response?.description,}
+     
         
         const specialization=response
         res.status(HTTP_statusCode.OK).json({message:"updatedsuccessfully",specialization})
@@ -177,7 +171,7 @@ class AdminController {
     const userState=req.body.status
 
     const responsestatus=await this._adminService.blockUnblockUser(user_id,userState)
-    console.log("response data issssss",responsestatus)
+    
     res.status(HTTP_statusCode.OK).json({message:"user status updated successfully",data:responsestatus?.isBlocked})
     
 
@@ -192,7 +186,7 @@ class AdminController {
     try {
       const trainerId = req.params.trainer_id;
       const trainerKycDetails = await this._adminService.fetchKycData(trainerId);
-      console.log("response check",trainerKycDetails)
+      
       return res.json({ kycData: trainerKycDetails });
 
 
@@ -207,7 +201,7 @@ class AdminController {
     try {
 
       const allTrainersKycData = await this._adminService.TraienrsKycData();
-      // console.log(allTrainersKycData);
+      
 
       res.status(HTTP_statusCode.OK).json({ message: "Trainers KYC data fetched successfully", data: allTrainersKycData });
     } catch (error) {

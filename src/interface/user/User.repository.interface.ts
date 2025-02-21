@@ -37,6 +37,7 @@ export interface IUserRepository{
     findBookings(user_id:string,trainerId:string):Promise<any>
     createReview(reviewComment:any,selectedRating:any,userId:any,trainerId:any):Promise<any>
     getAvgReviewsRating(trainer_id:string):Promise<any>
+    getReview(trainer_id:string):Promise<any>
 
 }
 

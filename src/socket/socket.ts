@@ -15,19 +15,19 @@ const io=new Server(server,{
       credentials:true
     }
 })
-console.log('io------------------',io);
+
 
 const userSocketMap: Record<string, string> = {}; 
 
 
 export const getReceiverSocketId=(receiverId:string)=>{
-   console.log("//////////////>>>>>>>>>",getReceiverSocketId)
+   
     return userSocketMap[receiverId]
 }
 
 io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId as string; 
-    console.log('userIduserId',userId);
+  
     
 if (userId) {
  
@@ -43,7 +43,7 @@ socket.on("disconnect", () => {
 
 socket.on('sendMessage', (data) => {
     if (userId) {
-      // console.log('sendMessage', data);
+      
       
       io.emit('messageUpdate',data) 
     } else {
@@ -68,39 +68,39 @@ socket.on('sendMessage', (data) => {
     }
   });
 
-  socket.on("accept-incoming-call",async(data)=>{
+  socket.on("accept-incoming-call", async (data) => {
+  
     try {
-      const friendSocketId=await getReceiverSocketId(data.to)
-      console.log("**********",friendSocketId)
-      if(friendSocketId){
+      const friendSocketId = await getReceiverSocketId(data.to);
+      if (friendSocketId) {
         const startedAt = new Date();
         const videoCall = {
           trainerId: data.from,
           userId: data.to,
           roomId: data.roomId,
-          duration: 0, // Duration will be updated later
+          duration: 0, 
           startedAt,
-          endedAt: null, // Not ended yet
+          endedAt: null, 
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        // await chatService.createVideoCallHistory(videoCall);
+       
+        
         socket.to(friendSocketId).emit("accepted-call", { ...data, startedAt });
-
-      }else {
+      } else {
         console.error(`No socket ID found for the receiver with ID: ${data.to}`);
       }
-    } catch (error:any) {
+    } catch (error: any) {
       console.error("Error in accept-incoming-call handler:", error.message);
-
     }
-  })
+  });
+  
   socket.on('trainer-call-accept',async (data) => {
     const trainerSocket = await getReceiverSocketId(data.trainerId)
     
     if(trainerSocket) {
 
-      socket.to(trainerSocket).emit('trianer-accept', data)
+      socket.to(trainerSocket).emit('trainer-accept', data)
     }
   })
 
@@ -133,9 +133,19 @@ socket.on('sendMessage', (data) => {
     }
   });
   socket.on('cancelTrainerNotification', (data) => {
-    const receiverSocketId = getReceiverSocketId(data.recetriverId);
+    const receiverSocketId = getReceiverSocketId(data.receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("receiveCancelNotificationForTrainer", data.content);
+      console.log("Notification sent to client:", data);
+    } else {
+      console.warn("No receiverSocketId found for receiverId:", data.receiverId);
+    }
+  });
+
+  socket.on('cancelUserNotification', (data) => {
+    const receiverSocketId = getReceiverSocketId(data.userId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("receiveCancelNotificationForUser", data.content);
       console.log("Notification sent to client:", data);
     } else {
       console.warn("No receiverSocketId found for receiverId:", data.receiverId);
